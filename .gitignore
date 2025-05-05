@@ -50,3 +50,9 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Compilation files
+build/
+
+# Generated files
+src/gen/
