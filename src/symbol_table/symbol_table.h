@@ -1,12 +1,7 @@
 #ifndef SYMBOL_TABLE_H__
 #define SYMBOL_TABLE_H__
 
-#include "../ast/ast.h"
-
-typedef struct symbolData
-{
-    char *name;
-} SymbolData;
+#include "symbol_data.h"
 
 typedef struct symbolElement
 {
