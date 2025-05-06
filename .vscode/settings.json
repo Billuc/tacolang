@@ -1,9 +1,6 @@
 {
     "files.associations": {
-        "ast_types.h": "c",
-        "ast_data.h": "c",
-        "stdlib.h": "c",
-        "string.h": "c"
+        "*.h": "c",
     },
     "editor.formatOnSave": true
 }

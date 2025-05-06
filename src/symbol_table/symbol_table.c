@@ -2,25 +2,45 @@
 #include <stdlib.h>
 #include <string.h>
 
-SymbolElement* createTable() {
+SymbolElement *createSymbolTable()
+{
     return NULL;
 }
 
-SymbolElement* put(SymbolElement* table, SymbolData* data) {
-    SymbolElement* newElement = malloc(sizeof(SymbolElement));
+SymbolElement *putSymbol(SymbolElement *table, SymbolData *data)
+{
+    SymbolElement *newElement = malloc(sizeof(SymbolElement));
     newElement->symbol = data;
     newElement->next = table;
     return newElement;
 }
 
-SymbolData* get(SymbolElement* table, char* name) {
-    SymbolElement* iterator;
-    
-    for (iterator = table; iterator != NULL; iterator = iterator->next) {
-        if (!strcmp(iterator->symbol->name, name)) {
+SymbolData *getSymbol(SymbolElement *table, char *name)
+{
+    SymbolElement *iterator;
+
+    for (iterator = table; iterator != NULL; iterator = iterator->next)
+    {
+        if (!strcmp(iterator->symbol->name, name))
+        {
             return iterator->symbol;
         }
     }
 
     return NULL;
+}
+
+void freeSymbolTable(SymbolElement *table)
+{
+    SymbolElement *iter = table;
+    SymbolElement *next = NULL;
+
+    while (iter != NULL)
+    {
+        free(iter->symbol->name);
+        free(iter->symbol);
+        next = iter->next;
+        free(iter);
+        iter = next;
+    }
 }

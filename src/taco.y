@@ -3,6 +3,9 @@
 #include "ast/ast.h"
 
 extern int yylineno;
+extern int yylex (void);
+
+void yyerror(const char* s);
 %}
 %define parse.error verbose
 
@@ -16,20 +19,20 @@ extern int yylineno;
 %token <string> IDENTIFIER TYPEDEF
 %token <integer> INTEGER
 
-%type <a> declaration assignment expression
+%type <a> declaration assignment expression statement statements
 
 %start program
 
 %%
-program: statements;
+program: statements { evalAST($1, NULL); }
 
-statements: /* empty */ 
-    | statements statement ENDSTMT
+statements: /* empty */ { $$ = NULL; }
+    | statements statement ENDSTMT { $$ = newStatement($1, $2); }
 ;
 
-statement: /* empty */
-    | declaration
-    | assignment
+statement: /* empty */ { $$ = NULL; }
+    | declaration   { $$ = $1; }
+    | assignment    { $$ = $1; }
 ;
 
 declaration: LET IDENTIFIER ':' TYPEDEF '=' expression { $$ = newDeclare($2, $4, $6); }
@@ -49,6 +52,6 @@ void main(int argc, char* argv[]) {
     yyparse();
 }
 
-void yyerror(char* s) {
-    fprintf(stderr, "[ERR] %s in line %d\n", s, yylineno);
+void yyerror(const char* s) {
+    fprintf(stderr, "[ERR] %s - line %d\n", s, yylineno);
 }

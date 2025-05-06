@@ -14,10 +14,8 @@ TYPE [A-Z][a-zA-Z0-9_]*
 [ \t]+      ;
 let         { return LET; }
 {DIGIT}+    { yylval.integer = atoi(yytext); return INTEGER; }
-{VARNAME}   { yylval.string = yytext; return IDENTIFIER; }
-{TYPE}      { yylval.string = yytext; return TYPEDEF; }
+{VARNAME}   { yylval.string = strdup(yytext); return IDENTIFIER; }
+{TYPE}      { yylval.string = strdup(yytext); return TYPEDEF; }
 \n          { return ENDSTMT; }
 .           { return yytext[0]; }
 %%
-
-/* #define yyterminate() return END */

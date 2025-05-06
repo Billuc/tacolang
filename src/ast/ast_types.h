@@ -3,18 +3,22 @@
 
 #include "ast_data.h"
 
-typedef enum {
+typedef enum
+{
     assign,
     declare,
     expression,
     integer,
+    statement,
 } ASTType;
 
-typedef union {
+typedef union
+{
     AssignData assignData;
     DeclareData declareData;
     ExpressionData expressionData;
     IntegerData integerData;
+    NoData noData;
 } ASTData;
 
 #endif

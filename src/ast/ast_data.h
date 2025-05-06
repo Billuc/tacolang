@@ -3,6 +3,10 @@
 
 typedef struct
 {
+} NoData;
+
+typedef struct
+{
     char *name;
 } AssignData;
 
@@ -17,7 +21,7 @@ typedef struct
     char *operation;
 } ExpressionData;
 
-typedef struct 
+typedef struct
 {
     int value;
 } IntegerData;
