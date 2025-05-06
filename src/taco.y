@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include "ast/ast.h"
 
-extern int yylineno;
 extern int yylex (void);
 
 void yyerror(const char* s);
@@ -53,5 +52,6 @@ void main(int argc, char* argv[]) {
 }
 
 void yyerror(const char* s) {
+    extern int yylineno;
     fprintf(stderr, "[ERR] %s - line %d\n", s, yylineno);
 }
