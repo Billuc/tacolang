@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+// TODO : improve symbol table by using a hash table instead of a linked list
+
 SymbolElement *createSymbolTable()
 {
     return NULL;
@@ -43,4 +45,8 @@ void freeSymbolTable(SymbolElement *table)
         free(iter);
         iter = next;
     }
+}
+
+SymbolData *createSymbol(char *name, char *type)
+{
 }

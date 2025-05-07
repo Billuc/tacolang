@@ -1,7 +1,13 @@
 #ifndef SYMBOL_TABLE_H__
 #define SYMBOL_TABLE_H__
 
-#include "symbol_data.h"
+#include "../eval/type.h"
+
+typedef struct symbolData
+{
+    char *name;
+    EvalType *type;
+} SymbolData;
 
 typedef struct symbolElement
 {
@@ -13,5 +19,7 @@ SymbolElement *createSymbolTable();
 SymbolElement *putSymbol(SymbolElement *table, SymbolData *data);
 SymbolData *getSymbol(SymbolElement *table, char *name);
 void freeSymbolTable(SymbolElement *table);
+
+SymbolData *createSymbol(char *name, char *type);
 
 #endif

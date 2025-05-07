@@ -10,6 +10,8 @@ typedef enum
     expression,
     integer,
     statement,
+    modifier,
+    typedefinition,
 } ASTType;
 
 typedef union
@@ -19,6 +21,8 @@ typedef union
     ExpressionData expressionData;
     IntegerData integerData;
     NoData noData;
+    ModifierData modifierData;
+    TypeDefData typedefData;
 } ASTData;
 
 #endif

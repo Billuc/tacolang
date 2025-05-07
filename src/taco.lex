@@ -13,6 +13,9 @@ TYPE [A-Z][a-zA-Z0-9_]*
 %%
 [ \t]+      ;
 let         { return LET; }
+mut         { yylval.string = strdup(yytext); return MODIFIER; }
+ref         { yylval.string = strdup(yytext); return MODIFIER; }
+opt         { yylval.string = strdup(yytext); return MODIFIER; }
 {DIGIT}+    { yylval.integer = atoi(yytext); return INTEGER; }
 {VARNAME}   { yylval.string = strdup(yytext); return IDENTIFIER; }
 {TYPE}      { yylval.string = strdup(yytext); return TYPEDEF; }

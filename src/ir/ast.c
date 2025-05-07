@@ -138,6 +138,37 @@ static void evalStatement(ASTElement *astElement, SymbolElement **symbolTable)
     evalAST(astElement->right, symbolTable);
 }
 
+/* MODIFIER */
+
+ASTElement *newModifier(char *modifierName, ASTElement *previousModifiers)
+{
+    printf("Modifier\n");
+    ModifierData modifierData = {.modifier = strdup(modifierName)};
+    ASTData data = {.modifierData = modifierData};
+    return newAST(modifier, data, previousModifiers, NULL);
+}
+
+static void freeModifier(ASTElement *astElement)
+{
+    free(astElement->data.modifierData.modifier);
+    freeAST(astElement->left);
+}
+
+static void evalModifier(ASTElement *astElement, SymbolElement **symbolTable)
+{
+    // TODO
+}
+
+/* TYPEDEF */
+
+ASTElement *newTypedef(char *typeName, ASTElement *modifiers)
+{
+    printf("Typedef\n");
+    TypeDefData typedefData = {.typename = strdup(typeName)};
+    ASTData data = {.typedefData = typedefData};
+    return newAST(typedefinition, data, modifiers, NULL);
+}
+
 /* General AST functions */
 
 static ASTElement *newAST(ASTType type, ASTData data, ASTElement *left, ASTElement *right)

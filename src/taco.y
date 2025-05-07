@@ -1,6 +1,12 @@
 %{
 #include <stdio.h>
-#include "ast/ast.h"
+#include "ast/elements/assign.h"
+#include "ast/elements/declare.h"
+#include "ast/elements/expression.h"
+#include "ast/elements/modifier.h"
+#include "ast/elements/statement.h"
+#include "ast/elements/typedef.h"
+#include "ast/elements/value.h"
 
 extern int yylex (void);
 
@@ -9,36 +15,59 @@ void yyerror(const char* s);
 %define parse.error verbose
 
 %union {
-    ASTElement *a;
+    AssignElement *assign;
+    DeclareElement *declare;
+    ExpressionElement *expression;
+    ModifierLink *modifierList;
+    StatementElement *statement;
+    StatementLink *statementList;
+    TypedefElement *typeDef;
+    ValueElement *value;
     int integer;
     char* string;
 }
 
 %token LET ENDSTMT
-%token <string> IDENTIFIER TYPEDEF
+%token <string> IDENTIFIER TYPEDEF MODIFIER
 %token <integer> INTEGER
 
-%type <a> declaration assignment expression statement statements
+%type <assign> assignment
+%type <declare> declaration
+%type <expression> expression
+%type <modifierList> modifiers
+%type <statement> statement
+%type <statementList> statements
+%type <typeDef> typedef
+%type <value> value
 
 %start program
 
 %%
-program: statements { evalAST($1, NULL); }
+program: statements { eval($1, NULL); }
 
 statements: /* empty */ { $$ = NULL; }
-    | statements statement ENDSTMT { $$ = newStatement($1, $2); }
+    | statements statement ENDSTMT { $$ = addStatement($1, $2); }
 ;
 
 statement: /* empty */ { $$ = NULL; }
-    | declaration   { $$ = $1; }
-    | assignment    { $$ = $1; }
+    | declaration   { $$ = newDeclarationStatement($1); }
+    | assignment    { $$ = newAssignmentStatement($1); }
 ;
 
-declaration: LET IDENTIFIER ':' TYPEDEF '=' expression { $$ = newDeclare($2, $4, $6); }
+declaration: LET IDENTIFIER ':' typedef '=' value { $$ = newDeclare($2, $4, $6); }
 
-assignment: IDENTIFIER '=' expression { $$ = newAssign($1, $3); }
+assignment: IDENTIFIER '=' value { $$ = newAssign($1, $3); }
 
-expression: INTEGER { $$ = newInteger($1); }
+value: INTEGER { $$ = newIntegerValue($1); }
+    | expression { $$ = newExpressionValue($1); }
+;
+
+expression: '.'; /* INTEGER { $$ = newInteger($1); } */
+
+typedef: modifiers TYPEDEF { $$ = newTypedef($1, $2); }
+
+modifiers: /* empty */ { $$ = NULL; }
+    | modifiers MODIFIER '.' { $$ = addModifier($1, $2); }
 
 %%
 

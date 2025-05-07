@@ -12,11 +12,13 @@ typedef struct astElement
     struct astElement *right;
 } ASTElement;
 
-ASTElement *newAST(ASTType type, ASTData data, ASTElement *left, ASTElement *right);
 ASTElement *newAssign(char *name, ASTElement *value);
 ASTElement *newDeclare(char *name, char *type, ASTElement *value);
 ASTElement *newExpression(char *operation, ASTElement *left, ASTElement *right);
 ASTElement *newInteger(int value);
+ASTElement *newStatement(ASTElement *previousStatements, ASTElement *stmt);
+ASTElement *newModifier(char *modifier, ASTElement *previousModifiers);
+ASTElement *newTypedef(char *typeName, ASTElement *modifiers);
 
 void freeAST(ASTElement *astElement);
 void evalAST(ASTElement *astElement, SymbolElement **symbolTable);

@@ -26,4 +26,14 @@ typedef struct
     int value;
 } IntegerData;
 
+typedef struct
+{
+    char *modifier;
+} ModifierData;
+
+typedef struct
+{
+    char *typename;
+} TypeDefData;
+
 #endif
