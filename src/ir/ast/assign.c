@@ -3,59 +3,55 @@
 #include <stdio.h>
 #include "assign.h"
 
-AssignElement *newAssign(char *name, ValueElement *value)
+extern void yyerror(char *s);
+
+AssignElement *newAssign(VariableElement *left, ValueElement *right)
 {
     AssignElement *element = malloc(sizeof(AssignElement));
-    element->name = strdup(name);
-    element->value = value;
+    element->left = left;
+    element->right = right;
     return element;
 }
 
 void freeAssign(AssignElement *assignElement)
 {
-    free(assignElement->name);
-    freeValue(assignElement->value);
+    freeVariable(assignElement->left);
+    freeValue(assignElement->right);
     free(assignElement);
 }
 
 void evalAssign(AssignElement *assignElement, SymbolElement **symbolTable)
 {
-    char *variableName = assignElement->name;
-    SymbolData *symbol = getSymbol(*symbolTable, variableName);
+    if (assignElement == NULL)
+        return;
 
-    if (symbol == NULL)
+    EvalVariableData *variableData = evalVariable(assignElement->left, symbolTable);
+    if (variableData == NULL)
+        return;
+
+    TypeModifierLink *firstModifier = variableData->variableType->data.variableTypeData.modifiers;
+    if (!variableData->isDeclaration && (!firstModifier || firstModifier->element.modifier_type != tm_mutable))
     {
         char buf[100] = "";
-        snprintf(buf, 100, "Variable '%s' has not been declared in this context", variableName);
+        snprintf(buf, 100, "You are trying to assign a value to a non mutable variable.");
         yyerror(buf);
         return;
     }
 
-    EvalValueData *valueData = evalValue(assignElement->value, symbolTable);
-
-    if (symbol->type->type != t_variable)
+    EvalValueData *valueData = evalValue(assignElement->right, symbolTable);
+    if (valueData == NULL)
     {
-        char buf[100] = "";
-        snprintf(buf, 100, "'%s' is not a variable ! You can't assign it a value.", variableName);
-        yyerror(buf);
+        // free(variableData);
         return;
     }
 
-    if (symbol->type->data.variableTypeData.modifiers->element->modifier_type != tm_mutable)
-    {
-        char buf[100] = "";
-        snprintf(buf, 100, "'%s' is not mutable ! You can't assign it a value.", variableName);
-        yyerror(buf);
-        return;
-    }
-
-    if (!eval_type_equals(valueData->valueType, symbol->type))
+    if (!eval_type_equals(valueData->valueType, variableData->variableType))
     {
         char buf[200] = "";
         char *value_type_str = print_type(valueData->valueType);
-        char *symbol_type_str = print_type(symbol->type);
+        char *symbol_type_str = print_type(variableData->variableType);
 
-        snprintf(buf, 200, "Couldn't assign value of type '%s' to variable '%s' of type '%s'", value_type_str, variableName, symbol_type_str);
+        snprintf(buf, 200, "Couldn't assign value of type '%s' to variable of type '%s'", value_type_str, symbol_type_str);
         yyerror(buf);
 
         free(value_type_str);

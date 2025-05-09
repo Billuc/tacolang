@@ -1,16 +1,17 @@
 #include <string.h>
 #include "type_modifier.h"
+#include "../../utils/str_utils.h"
 
-bool type_modifier_equals(TypeModifier *modifier1, TypeModifier *modifier2)
+bool type_modifier_equals(TypeModifier modifier1, TypeModifier modifier2)
 {
-    return modifier1->modifier_type == modifier2->modifier_type;
+    return modifier1.modifier_type == modifier2.modifier_type;
 }
 
-char *print_type_modifier(TypeModifier *modifier)
+char *print_type_modifier(TypeModifier modifier)
 {
     char buf[10] = "";
 
-    switch (modifier->modifier_type)
+    switch (modifier.modifier_type)
     {
     case tm_mutable:
         strcpy(buf, "mut");

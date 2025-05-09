@@ -1,2 +1,2 @@
+let a: mut.U32 = 2
 a = 4
-let a: U8 = 2

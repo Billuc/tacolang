@@ -56,3 +56,6 @@ build/
 
 # Generated files
 src/gen/
+
+# Core files
+core.*

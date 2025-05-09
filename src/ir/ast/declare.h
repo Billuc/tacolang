@@ -9,11 +9,16 @@ typedef struct
 {
     char *name;
     TypedefElement *type;
-    ValueElement *value;
 } DeclareElement;
 
-DeclareElement *newDeclare(char *name, TypedefElement *type, ValueElement *value);
+typedef struct
+{
+    char *symbolName;
+    EvalType *symbolType;
+} EvalDeclareData;
+
+DeclareElement *newDeclare(char *name, TypedefElement *type);
 void freeDeclare(DeclareElement *declareEl);
-void evalDeclare(DeclareElement *declareElement, SymbolElement **symbolTable);
+EvalDeclareData *evalDeclare(DeclareElement *declareElement, SymbolElement **symbolTable);
 
 #endif // DECLARE_H__

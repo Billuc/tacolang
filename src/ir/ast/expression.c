@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "expression.h"
+#include "../../utils/str_utils.h"
 
 ExpressionElement *newExpression(char *operation)
 {
@@ -16,14 +17,10 @@ void freeExpression(ExpressionElement *element)
 }
 
 // TODO : remove
-const TypeData intTypeData = {
+static const TypeData intTypeData = {
     .is_base_type = true,
     .type_data = {.baseType = U32},
-    .mutable = false,
-    .reference = false,
-    .array = false,
-    .array_len = 0,
-    .optional = 0,
+    .modifiers = NULL,
 };
 
 EvalExpressionData *evalExpression(ExpressionElement *element, SymbolElement **symbolTable)

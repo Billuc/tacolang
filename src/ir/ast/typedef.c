@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "typedef.h"
+#include "../../utils/str_utils.h"
 
 TypedefElement *newTypedef(ModifierLink *modifiers, char *name)
 {
@@ -17,7 +18,32 @@ void freeTypedef(TypedefElement *element)
     free(element);
 }
 
-void evalTypedef(TypedefElement *typedefElement, SymbolElement **symbolTable)
+EvalTypedefData *evalTypedef(TypedefElement *typedefElement, SymbolElement **symbolTable)
 {
-    // TODO
+    EvalTypedefData *evalData = malloc(sizeof(EvalTypedefData));
+    EvalType *evalType = malloc(sizeof(EvalType));
+
+    EvalModifierLinkData *modifiers = evalModifierList(typedefElement->modifiers, symbolTable);
+    evalType->type = t_variable;
+    evalType->data.variableTypeData.modifiers = modifiers->typeModifierList;
+
+    int i;
+    for (i = 0; i < BASE_TYPES_LEN; i++)
+    {
+        if (strcmp(BASE_TYPES[i].name, typedefElement->name) == 0)
+        {
+            evalType->data.variableTypeData.is_base_type = true;
+            evalType->data.variableTypeData.type_data.baseType = BASE_TYPES[i].baseType;
+            break;
+        }
+    }
+
+    if (i == BASE_TYPES_LEN)
+    {
+        evalType->data.variableTypeData.is_base_type = false;
+        evalType->data.variableTypeData.type_data.customType = strdup(typedefElement->name);
+    }
+
+    evalData->type = evalType;
+    return evalData;
 }

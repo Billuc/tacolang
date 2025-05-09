@@ -1,15 +1,6 @@
 #include <stdlib.h>
 #include "statement.h"
 
-StatementElement *newDeclarationStatement(DeclareElement *declare)
-{
-    StatementElement *element = malloc(sizeof(StatementElement));
-    StatementData data = {.declare = declare};
-    element->data = data;
-    element->type = s_declaration;
-    return element;
-}
-
 StatementElement *newAssignmentStatement(AssignElement *assign)
 {
     StatementElement *element = malloc(sizeof(StatementElement));
@@ -26,9 +17,6 @@ void freeStatement(StatementElement *element)
     case s_assignment:
         freeAssign(element->data.assign);
         break;
-    case s_declaration:
-        freeDeclare(element->data.declare);
-        break;
     }
 
     free(element);
@@ -36,7 +24,12 @@ void freeStatement(StatementElement *element)
 
 void evalStatement(StatementElement *element, SymbolElement **symbolTable)
 {
-    // TODO
+    switch (element->type)
+    {
+    case s_assignment:
+        evalAssign(element->data.assign, symbolTable);
+        break;
+    }
 }
 
 StatementLink *addStatement(StatementLink *list, StatementElement *newElement)
@@ -62,5 +55,38 @@ void freeStatementList(StatementLink *list)
 
 void evalStatementList(StatementLink *list, SymbolElement **symbolTable)
 {
-    // TODO
+    SymbolElement *table;
+    if (symbolTable == NULL)
+    {
+        table = createSymbolTable();
+        symbolTable = &table;
+    }
+
+    // Reverse the list
+    StatementLink *reversedList = NULL;
+    StatementLink *iter = list;
+    while (iter != NULL)
+    {
+        StatementLink *new = malloc(sizeof(StatementLink));
+        new->element = iter->element;
+        new->next = reversedList;
+        reversedList = new;
+        iter = iter->next;
+    }
+
+    // Iterate through the list and evaluate each statement
+    iter = reversedList;
+    while (iter != NULL)
+    {
+        evalStatement(iter->element, symbolTable);
+        iter = iter->next;
+    }
+
+    // Free the symbol table
+    if (symbolTable != NULL)
+    {
+        freeSymbolTable(*symbolTable);
+        // free(symbolTable); // Segfault here
+        symbolTable = NULL; // Set to NULL to avoid dangling pointer
+    }
 }

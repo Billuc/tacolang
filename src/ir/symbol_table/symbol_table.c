@@ -46,7 +46,3 @@ void freeSymbolTable(SymbolElement *table)
         iter = next;
     }
 }
-
-SymbolData *createSymbol(char *name, char *type)
-{
-}

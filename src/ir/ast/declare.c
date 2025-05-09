@@ -1,13 +1,16 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include "declare.h"
+#include "../../utils/str_utils.h"
 
-DeclareElement *newDeclare(char *name, TypedefElement *type, ValueElement *value)
+extern void yyerror(char *s);
+
+DeclareElement *newDeclare(char *name, TypedefElement *type)
 {
     DeclareElement *element = malloc(sizeof(DeclareElement));
     element->name = strdup(name);
     element->type = type;
-    element->value = value;
     return element;
 }
 
@@ -15,11 +18,35 @@ void freeDeclare(DeclareElement *element)
 {
     free(element->name);
     freeTypedef(element->type);
-    freeValue(element->value);
     free(element);
 }
 
-void evalDeclare(DeclareElement *declareElement, SymbolElement **symbolTable)
+EvalDeclareData *evalDeclare(DeclareElement *declareElement, SymbolElement **symbolTable)
 {
-    // TODO
+    char *variableName = declareElement->name;
+    SymbolData *symbol = getSymbol(*symbolTable, variableName);
+
+    if (symbol != NULL)
+    {
+        char buf[100] = "";
+        snprintf(buf, 100, "Variable '%s' has already been declared in this context", variableName);
+        yyerror(buf);
+        return NULL;
+    }
+
+    EvalTypedefData *typedefData = evalTypedef(declareElement->type, symbolTable);
+
+    SymbolData *newSymbol = malloc(sizeof(SymbolData));
+    newSymbol->name = strdup(declareElement->name);
+    newSymbol->type = typedefData->type;
+    SymbolElement *newHead = putSymbol(*symbolTable, newSymbol);
+    *symbolTable = newHead;
+
+    EvalType *evalType = malloc(sizeof(EvalType));
+    memcpy(evalType, typedefData->type, sizeof(EvalType));
+
+    EvalDeclareData *data = malloc(sizeof(EvalDeclareData));
+    data->symbolName = strdup(variableName);
+    data->symbolType = evalType;
+    return data;
 }

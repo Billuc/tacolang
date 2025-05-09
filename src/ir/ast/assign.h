@@ -2,15 +2,16 @@
 #define ASSIGN_H__
 
 #include "value.h"
+#include "variable.h"
 #include "../symbol_table/symbol_table.h"
 
 typedef struct
 {
-    char *name;
-    ValueElement *value;
+    VariableElement *left;
+    ValueElement *right;
 } AssignElement;
 
-AssignElement *newAssign(char *name, ValueElement *value);
+AssignElement *newAssign(VariableElement *left, ValueElement *right);
 void freeAssign(AssignElement *assignEl);
 void evalAssign(AssignElement *assignElement, SymbolElement **symbolTable);
 

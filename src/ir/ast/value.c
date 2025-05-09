@@ -33,23 +33,15 @@ void freeValue(ValueElement *valueEl)
     free(valueEl);
 }
 
-const TypeData intTypeData = {
+static const TypeData intTypeData = {
     .is_base_type = true,
     .type_data = {.baseType = U32},
-    .mutable = false,
-    .reference = false,
-    .array = false,
-    .array_len = 0,
-    .optional = 0,
+    .modifiers = NULL,
 };
-const TypeData floatTypeData = {
+static const TypeData floatTypeData = {
     .is_base_type = true,
     .type_data = {.baseType = F32},
-    .mutable = false,
-    .reference = false,
-    .array = false,
-    .array_len = 0,
-    .optional = 0,
+    .modifiers = NULL,
 };
 
 EvalValueData *evalValue(ValueElement *valueElement, SymbolElement **symbolTable)

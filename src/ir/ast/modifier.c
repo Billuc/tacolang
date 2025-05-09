@@ -39,9 +39,24 @@ void freeModifier(ModifierElement *element)
     free(element);
 }
 
-void evalModifier(ModifierElement *element, SymbolElement **symbolTable)
+EvalModifierData *evalModifier(ModifierElement *element, SymbolElement **symbolTable)
 {
-    // TODO
+    EvalModifierData *data = malloc(sizeof(EvalModifierData));
+
+    switch (element->type)
+    {
+    case mutable:
+        data->typeModifier.modifier_type = tm_mutable;
+        break;
+    case reference:
+        data->typeModifier.modifier_type = tm_reference;
+        break;
+    case optional:
+        data->typeModifier.modifier_type = tm_optional;
+        break;
+    }
+
+    return data;
 }
 
 ModifierLink *addModifier(ModifierLink *list, ModifierElement *newElement)
@@ -65,7 +80,21 @@ void freeModifierList(ModifierLink *list)
     }
 }
 
-void evalModifierList(ModifierLink *list)
+EvalModifierLinkData *evalModifierList(ModifierLink *list, SymbolElement **symbolTable)
 {
-    // TODO
+    EvalModifierLinkData *data = malloc(sizeof(EvalModifierLinkData));
+    data->typeModifierList = NULL;
+    ModifierLink *iter = list;
+
+    while (iter != NULL)
+    {
+        EvalModifierData *iterData = evalModifier(iter->data, symbolTable);
+        TypeModifierLink *newHead = malloc(sizeof(TypeModifierLink));
+        newHead->element = iterData->typeModifier;
+        newHead->next = data->typeModifierList;
+        data->typeModifierList = newHead;
+        iter = iter->next;
+    }
+
+    return data;
 }

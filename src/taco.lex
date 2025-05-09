@@ -2,8 +2,8 @@
 %option yylineno
 %{
 #include <string.h>
-#include "ast/ast.h"
 #include "taco.tab.h"
+#include "utils/str_utils.h"
 %}
 
 DIGIT [0-9]

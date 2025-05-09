@@ -7,14 +7,12 @@
 
 typedef enum
 {
-    s_declaration,
     s_assignment,
 } StatementType;
 
 typedef union
 {
     AssignElement *assign;
-    DeclareElement *declare;
 } StatementData;
 
 typedef struct
@@ -29,7 +27,6 @@ typedef struct statementLink
     struct statementLink *next;
 } StatementLink;
 
-StatementElement *newDeclarationStatement(DeclareElement *declare);
 StatementElement *newAssignmentStatement(AssignElement *assign);
 void freeStatement(StatementElement *statementEl);
 void evalStatement(StatementElement *statementElement, SymbolElement **symbolTable);

@@ -23,11 +23,11 @@ typedef struct
 
 typedef struct typeModifierLink
 {
-    TypeModifier *element;
+    TypeModifier element;
     struct typeModifierLink *next;
 } TypeModifierLink;
 
-bool type_modifier_equals(TypeModifier *modifier1, TypeModifier *modifier2);
-char *print_type_modifier(TypeModifier *modifier);
+bool type_modifier_equals(TypeModifier modifier1, TypeModifier modifier2);
+char *print_type_modifier(TypeModifier modifier);
 
 #endif // TYPE_MODIFIER_H__

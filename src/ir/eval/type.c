@@ -1,5 +1,23 @@
 #include <string.h>
+#include <stdlib.h>
 #include "type.h"
+#include "../../utils/str_utils.h"
+
+const struct baseTypeData BASE_TYPES[] = {
+    {U8, "U8"},
+    {U16, "U16"},
+    {U32, "U32"},
+    {U64, "U64"},
+    {I8, "I8"},
+    {I16, "I16"},
+    {I32, "I32"},
+    {I64, "I64"},
+    {F32, "F32"},
+    {F64, "F64"},
+    {Boolean, "Boolean"},
+    {None, "None"},
+};
+const int BASE_TYPES_LEN = sizeof(BASE_TYPES) / sizeof(BASE_TYPES[0]);
 
 bool type_data_equals(TypeData typeData1, TypeData typeData2)
 {
@@ -111,6 +129,7 @@ static char *print_type_data(TypeData type)
         strcat(buf, modifier_str);
         strcat(buf, ".");
         free(modifier_str);
+        iter = iter->next;
     }
 
     if (type.is_base_type)

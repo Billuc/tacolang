@@ -10,8 +10,13 @@ typedef struct
     ModifierLink *modifiers;
 } TypedefElement;
 
+typedef struct
+{
+    EvalType *type;
+} EvalTypedefData;
+
 TypedefElement *newTypedef(ModifierLink *modifiers, char *name);
 void freeTypedef(TypedefElement *typedefEl);
-void evalTypedef(TypedefElement *typedefElement, SymbolElement **symbolTable);
+EvalTypedefData *evalTypedef(TypedefElement *typedefElement, SymbolElement **symbolTable);
 
 #endif // TYPEDEF_H__

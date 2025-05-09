@@ -20,6 +20,4 @@ SymbolElement *putSymbol(SymbolElement *table, SymbolData *data);
 SymbolData *getSymbol(SymbolElement *table, char *name);
 void freeSymbolTable(SymbolElement *table);
 
-SymbolData *createSymbol(char *name, char *type);
-
 #endif

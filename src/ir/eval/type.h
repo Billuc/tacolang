@@ -23,6 +23,15 @@ typedef enum
     None,    // void
 } BaseType;
 
+struct baseTypeData
+{
+    BaseType baseType;
+    char *name;
+};
+
+extern const struct baseTypeData BASE_TYPES[]; // Defined in type.c
+extern const int BASE_TYPES_LEN;               // Defined in type.c
+
 typedef union
 {
     BaseType baseType;

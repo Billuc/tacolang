@@ -1,28 +1,36 @@
 %{
 #include <stdio.h>
-#include "ast/elements/assign.h"
-#include "ast/elements/declare.h"
-#include "ast/elements/expression.h"
-#include "ast/elements/modifier.h"
-#include "ast/elements/statement.h"
-#include "ast/elements/typedef.h"
-#include "ast/elements/value.h"
 
-extern int yylex (void);
+extern int yylex(void);
+extern int yyparse(void);
+extern int yywrap() { return 1; }
 
 void yyerror(const char* s);
 %}
 %define parse.error verbose
+
+%code requires {
+#include "ir/ast/assign.h"
+#include "ir/ast/declare.h"
+#include "ir/ast/expression.h"
+#include "ir/ast/modifier.h"
+#include "ir/ast/statement.h"
+#include "ir/ast/typedef.h"
+#include "ir/ast/value.h"
+#include "ir/ast/variable.h"
+}
 
 %union {
     AssignElement *assign;
     DeclareElement *declare;
     ExpressionElement *expression;
     ModifierLink *modifierList;
+    ModifierElement *modifier;
     StatementElement *statement;
     StatementLink *statementList;
     TypedefElement *typeDef;
     ValueElement *value;
+    VariableElement *variable;
     int integer;
     char* string;
 }
@@ -35,39 +43,47 @@ void yyerror(const char* s);
 %type <declare> declaration
 %type <expression> expression
 %type <modifierList> modifiers
+%type <modifier> modifier
 %type <statement> statement
 %type <statementList> statements
 %type <typeDef> typedef
 %type <value> value
+%type <variable> variable
 
 %start program
 
 %%
-program: statements { eval($1, NULL); }
+program: statements { evalStatementList($1, NULL); }
 
 statements: /* empty */ { $$ = NULL; }
     | statements statement ENDSTMT { $$ = addStatement($1, $2); }
 ;
 
 statement: /* empty */ { $$ = NULL; }
-    | declaration   { $$ = newDeclarationStatement($1); }
     | assignment    { $$ = newAssignmentStatement($1); }
 ;
 
-declaration: LET IDENTIFIER ':' typedef '=' value { $$ = newDeclare($2, $4, $6); }
+declaration: LET IDENTIFIER ':' typedef { $$ = newDeclare($2, $4); }
 
-assignment: IDENTIFIER '=' value { $$ = newAssign($1, $3); }
+assignment: variable '=' value { $$ = newAssign($1, $3); }
+
+variable: IDENTIFIER { $$ = newIdentifierVariable($1); }
+    | declaration { $$ = newDeclareVariable($1); }
+;
 
 value: INTEGER { $$ = newIntegerValue($1); }
     | expression { $$ = newExpressionValue($1); }
 ;
 
-expression: '.'; /* INTEGER { $$ = newInteger($1); } */
+expression: '.' { $$ = newExpression("."); } 
+/* INTEGER { $$ = newInteger($1); } */
 
 typedef: modifiers TYPEDEF { $$ = newTypedef($1, $2); }
 
 modifiers: /* empty */ { $$ = NULL; }
-    | modifiers MODIFIER '.' { $$ = addModifier($1, $2); }
+    | modifiers modifier '.' { $$ = addModifier($1, $2); }
+
+modifier: MODIFIER { $$ = newModifier($1); }
 
 %%
 
