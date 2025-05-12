@@ -83,7 +83,7 @@ bool eval_type_equals(EvalType *type1, EvalType *type2)
     case t_variable:
         return type_data_equals(type1->data.variableTypeData, type2->data.variableTypeData);
     default:
-        break;
+        return false;
     }
 }
 
@@ -115,6 +115,8 @@ static char *print_base_type(BaseType baseType)
         return strdup("Boolean");
     case None:
         return strdup("None");
+    default:
+        return strdup("Unknown");
     }
 }
 
@@ -190,5 +192,7 @@ char *print_type(EvalType *type)
         return print_function_type(type->data.functionTypeData);
     case t_structure:
         return print_struct_type(type->data.structTypeData);
+    default:
+        return strdup("Unknown");
     }
 }

@@ -1,6 +1,7 @@
 #if !defined(MODIFIER_H__)
 #define MODIFIER_H__
 
+#include "common.h"
 #include "../eval/type_modifier.h"
 #include "../symbol_table/symbol_table.h"
 
@@ -13,8 +14,21 @@ typedef enum
 
 typedef struct
 {
+    TypeModifier typeModifier;
+} EvalModifierData;
+
+typedef struct modifierElement
+{
     Modifier type;
+
+    FREE_FUNC(struct modifierElement, free);
+    EVAL_FUNC(struct modifierElement, EvalModifierData *, eval);
 } ModifierElement;
+
+typedef struct
+{
+    TypeModifierLink *typeModifierList;
+} EvalModifierLinkData;
 
 typedef struct modifierLink
 {
@@ -22,19 +36,9 @@ typedef struct modifierLink
     struct modifierLink *next;
 } ModifierLink;
 
-typedef struct
-{
-    TypeModifier typeModifier;
-} EvalModifierData;
-
-typedef struct
-{
-    TypeModifierLink *typeModifierList;
-} EvalModifierLinkData;
-
 ModifierElement *newModifier(char *type);
-void freeModifier(ModifierElement *modifierEl);
-EvalModifierData *evalModifier(ModifierElement *modifierElement, SymbolElement **symbolTable);
+// void freeModifier(ModifierElement *modifierEl);
+// EvalModifierData *evalModifier(ModifierElement *modifierElement, SymbolElement **symbolTable);
 
 ModifierLink *addModifier(ModifierLink *list, ModifierElement *newElement);
 void freeModifierList(ModifierLink *list);

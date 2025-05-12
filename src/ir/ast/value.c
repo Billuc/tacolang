@@ -1,37 +1,8 @@
 #include <stdlib.h>
 #include "value.h"
 
-ValueElement *newExpressionValue(ExpressionElement *value)
-{
-    ValueElement *element = malloc(sizeof(ValueElement));
-    element->type = v_expression;
-    element->value.expression = value;
-    return element;
-}
-
-ValueElement *newIntegerValue(int value)
-{
-    ValueElement *element = malloc(sizeof(ValueElement));
-    element->type = v_expression;
-    element->value.integer = value;
-    return element;
-}
-
-ValueElement *newFloatValue(float value)
-{
-    ValueElement *element = malloc(sizeof(ValueElement));
-
-    element->value.floating = value;
-    return element;
-}
-
-void freeValue(ValueElement *valueEl)
-{
-    if (valueEl->type == v_expression)
-        freeExpression(valueEl->value.expression);
-
-    free(valueEl);
-}
+static void freeValue(ValueElement *valueEl);
+static EvalValueData *evalValue(ValueElement *valueElement, SymbolElement **symbolTable);
 
 static const TypeData intTypeData = {
     .is_base_type = true,
@@ -44,7 +15,45 @@ static const TypeData floatTypeData = {
     .modifiers = NULL,
 };
 
-EvalValueData *evalValue(ValueElement *valueElement, SymbolElement **symbolTable)
+ValueElement *newExpressionValue(ExpressionElement *value)
+{
+    ValueElement *element = malloc(sizeof(ValueElement));
+    element->type = v_expression;
+    element->value.expression = value;
+    element->free = freeValue;
+    element->eval = evalValue;
+    return element;
+}
+
+ValueElement *newIntegerValue(int value)
+{
+    ValueElement *element = malloc(sizeof(ValueElement));
+    element->type = v_integer;
+    element->value.integer = value;
+    element->free = freeValue;
+    element->eval = evalValue;
+    return element;
+}
+
+ValueElement *newFloatValue(float value)
+{
+    ValueElement *element = malloc(sizeof(ValueElement));
+    element->type = v_floating;
+    element->value.floating = value;
+    element->free = freeValue;
+    element->eval = evalValue;
+    return element;
+}
+
+static void freeValue(ValueElement *valueEl)
+{
+    if (valueEl->type == v_expression)
+        valueEl->value.expression->free(valueEl->value.expression);
+
+    free(valueEl);
+}
+
+static EvalValueData *evalValue(ValueElement *valueElement, SymbolElement **symbolTable)
 {
     EvalValueData *valueData = malloc(sizeof(EvalValueData));
     EvalType *evalType;
@@ -68,7 +77,7 @@ EvalValueData *evalValue(ValueElement *valueElement, SymbolElement **symbolTable
         break;
     }
     case v_expression:
-        EvalExpressionData *expressionData = evalExpression(valueElement->value.expression, symbolTable);
+        EvalExpressionData *expressionData = valueElement->value.expression->eval(valueElement->value.expression, symbolTable);
         evalType = expressionData->type;
         break;
     }

@@ -4,6 +4,8 @@
 #include <stdio.h>
 
 extern void yyerror(char *s);
+static void freeVariable(VariableElement *variableEl);
+static EvalVariableData *evalVariable(VariableElement *variableElement, SymbolElement **symbolTable);
 
 VariableElement *newIdentifierVariable(char *identifier)
 {
@@ -11,9 +13,11 @@ VariableElement *newIdentifierVariable(char *identifier)
     if (!variable)
         return NULL;
 
+    variable->free = freeVariable;
+    variable->eval = evalVariable;
     variable->type = var_identifier;
-    variable->variable.identifier = strdup(identifier);
-    if (!variable->variable.identifier)
+    variable->data.identifier = strdup(identifier);
+    if (!variable->data.identifier)
     {
         free(variable);
         return NULL;
@@ -28,13 +32,15 @@ VariableElement *newDeclareVariable(DeclareElement *declare)
     if (!variable)
         return NULL;
 
+    variable->free = freeVariable;
+    variable->eval = evalVariable;
     variable->type = var_declare;
-    variable->variable.declare = declare;
+    variable->data.declare = declare;
 
     return variable;
 }
 
-void freeVariable(VariableElement *variableEl)
+static void freeVariable(VariableElement *variableEl)
 {
     if (!variableEl)
         return;
@@ -42,17 +48,17 @@ void freeVariable(VariableElement *variableEl)
     switch (variableEl->type)
     {
     case var_identifier:
-        free(variableEl->variable.identifier);
+        free(variableEl->data.identifier);
         break;
     case var_declare:
-        freeDeclare(variableEl->variable.declare);
+        variableEl->data.declare->free(variableEl->data.declare);
         break;
     }
 
     free(variableEl);
 }
 
-EvalVariableData *evalVariable(VariableElement *variableElement, SymbolElement **symbolTable)
+static EvalVariableData *evalVariable(VariableElement *variableElement, SymbolElement **symbolTable)
 {
     if (!variableElement)
         return NULL;
@@ -65,11 +71,11 @@ EvalVariableData *evalVariable(VariableElement *variableElement, SymbolElement *
     {
     case var_identifier:
     {
-        SymbolData *symbol = getSymbol(*symbolTable, variableElement->variable.identifier);
+        SymbolData *symbol = getSymbol(*symbolTable, variableElement->data.identifier);
         if (!symbol)
         {
             char buf[100] = "";
-            snprintf(buf, 100, "Variable '%s' is not declared in this context", variableElement->variable.identifier);
+            snprintf(buf, 100, "Variable '%s' is not declared in this context", variableElement->data.identifier);
             yyerror(buf);
             free(evalData);
             return NULL;
@@ -80,7 +86,7 @@ EvalVariableData *evalVariable(VariableElement *variableElement, SymbolElement *
     }
     case var_declare:
     {
-        EvalDeclareData *declareData = evalDeclare(variableElement->variable.declare, symbolTable);
+        EvalDeclareData *declareData = variableElement->data.declare->eval(variableElement->data.declare, symbolTable);
         if (!declareData)
         {
             free(evalData);

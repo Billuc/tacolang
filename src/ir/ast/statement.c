@@ -1,33 +1,38 @@
 #include <stdlib.h>
 #include "statement.h"
 
+static void freeStatement(StatementElement *element);
+static void evalStatement(StatementElement *element, SymbolElement **symbolTable);
+
 StatementElement *newAssignmentStatement(AssignElement *assign)
 {
     StatementElement *element = malloc(sizeof(StatementElement));
     StatementData data = {.assign = assign};
     element->data = data;
     element->type = s_assignment;
+    element->free = freeStatement;
+    element->eval = evalStatement;
     return element;
 }
 
-void freeStatement(StatementElement *element)
+static void freeStatement(StatementElement *element)
 {
     switch (element->type)
     {
     case s_assignment:
-        freeAssign(element->data.assign);
+        element->data.assign->free(element->data.assign);
         break;
     }
 
     free(element);
 }
 
-void evalStatement(StatementElement *element, SymbolElement **symbolTable)
+static void evalStatement(StatementElement *element, SymbolElement **symbolTable)
 {
     switch (element->type)
     {
     case s_assignment:
-        evalAssign(element->data.assign, symbolTable);
+        element->data.assign->eval(element->data.assign, symbolTable);
         break;
     }
 }
@@ -46,7 +51,7 @@ void freeStatementList(StatementLink *list)
 
     while (iter != NULL)
     {
-        freeStatement(iter->element);
+        iter->element->free(iter->element);
         StatementLink *next = iter->next;
         free(iter);
         iter = next;
@@ -78,7 +83,7 @@ void evalStatementList(StatementLink *list, SymbolElement **symbolTable)
     iter = reversedList;
     while (iter != NULL)
     {
-        evalStatement(iter->element, symbolTable);
+        iter->element->eval(iter->element, symbolTable);
         iter = iter->next;
     }
 

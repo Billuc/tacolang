@@ -4,28 +4,32 @@
 #include "assign.h"
 
 extern void yyerror(char *s);
+static void freeAssign(AssignElement *assignElement);
+static void evalAssign(AssignElement *assignElement, SymbolElement **symbolTable);
 
 AssignElement *newAssign(VariableElement *left, ValueElement *right)
 {
     AssignElement *element = malloc(sizeof(AssignElement));
     element->left = left;
     element->right = right;
+    element->free = freeAssign;
+    element->eval = evalAssign;
     return element;
 }
 
-void freeAssign(AssignElement *assignElement)
+static void freeAssign(AssignElement *assignElement)
 {
-    freeVariable(assignElement->left);
-    freeValue(assignElement->right);
+    assignElement->left->free(assignElement->left);
+    assignElement->right->free(assignElement->right);
     free(assignElement);
 }
 
-void evalAssign(AssignElement *assignElement, SymbolElement **symbolTable)
+static void evalAssign(AssignElement *assignElement, SymbolElement **symbolTable)
 {
     if (assignElement == NULL)
         return;
 
-    EvalVariableData *variableData = evalVariable(assignElement->left, symbolTable);
+    EvalVariableData *variableData = assignElement->left->eval(assignElement->left, symbolTable);
     if (variableData == NULL)
         return;
 
@@ -38,7 +42,7 @@ void evalAssign(AssignElement *assignElement, SymbolElement **symbolTable)
         return;
     }
 
-    EvalValueData *valueData = evalValue(assignElement->right, symbolTable);
+    EvalValueData *valueData = assignElement->right->eval(assignElement->right, symbolTable);
     if (valueData == NULL)
     {
         // free(variableData);

@@ -87,13 +87,15 @@ modifier: MODIFIER { $$ = newModifier($1); }
 
 %%
 
-void main(int argc, char* argv[]) {
+int main(int argc, char* argv[]) {
     extern FILE* yyin;
 
     ++argv; --argc;
 
     yyin = fopen(argv[0], "r");
     yyparse();
+
+    return 1;
 }
 
 void yyerror(const char* s) {

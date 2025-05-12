@@ -5,19 +5,23 @@
 #include "../../utils/str_utils.h"
 
 extern void yyerror(char *s);
+static void freeDeclare(DeclareElement *element);
+static EvalDeclareData *evalDeclare(DeclareElement *declareElement, SymbolElement **symbolTable);
 
 DeclareElement *newDeclare(char *name, TypedefElement *type)
 {
     DeclareElement *element = malloc(sizeof(DeclareElement));
     element->name = strdup(name);
     element->type = type;
+    element->free = freeDeclare;
+    element->eval = evalDeclare;
     return element;
 }
 
 void freeDeclare(DeclareElement *element)
 {
     free(element->name);
-    freeTypedef(element->type);
+    element->type->free(element->type);
     free(element);
 }
 
@@ -34,7 +38,7 @@ EvalDeclareData *evalDeclare(DeclareElement *declareElement, SymbolElement **sym
         return NULL;
     }
 
-    EvalTypedefData *typedefData = evalTypedef(declareElement->type, symbolTable);
+    EvalTypedefData *typedefData = declareElement->type->eval(declareElement->type, symbolTable);
 
     SymbolData *newSymbol = malloc(sizeof(SymbolData));
     newSymbol->name = strdup(declareElement->name);

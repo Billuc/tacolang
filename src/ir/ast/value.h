@@ -2,6 +2,7 @@
 #define VALUE_H__
 
 #include "expression.h"
+#include "common.h"
 #include "../symbol_table/symbol_table.h"
 #include "../eval/type.h"
 
@@ -21,19 +22,22 @@ typedef union
 
 typedef struct
 {
-    ValueType type;
-    ValueData value;
-} ValueElement;
-
-typedef struct
-{
     EvalType *valueType;
 } EvalValueData;
+
+typedef struct valueElement
+{
+    ValueType type;
+    ValueData value;
+
+    FREE_FUNC(struct valueElement, free);
+    EVAL_FUNC(struct valueElement, EvalValueData *, eval);
+} ValueElement;
 
 ValueElement *newExpressionValue(ExpressionElement *value);
 ValueElement *newIntegerValue(int value);
 ValueElement *newFloatValue(float value);
-void freeValue(ValueElement *valueEl);
-EvalValueData *evalValue(ValueElement *valueElement, SymbolElement **symbolTable);
+// void freeValue(ValueElement *valueEl);
+// EvalValueData *evalValue(ValueElement *valueElement, SymbolElement **symbolTable);
 
 #endif // VALUE_H__

@@ -3,18 +3,8 @@
 #include "expression.h"
 #include "../../utils/str_utils.h"
 
-ExpressionElement *newExpression(char *operation)
-{
-    ExpressionElement *element = malloc(sizeof(ExpressionElement));
-    element->operation = strdup(operation);
-    return element;
-}
-
-void freeExpression(ExpressionElement *element)
-{
-    free(element->operation);
-    free(element);
-}
+static void freeExpression(ExpressionElement *element);
+static EvalExpressionData *evalExpression(ExpressionElement *element, SymbolElement **symbolTable);
 
 // TODO : remove
 static const TypeData intTypeData = {
@@ -23,7 +13,22 @@ static const TypeData intTypeData = {
     .modifiers = NULL,
 };
 
-EvalExpressionData *evalExpression(ExpressionElement *element, SymbolElement **symbolTable)
+ExpressionElement *newExpression(char *operation)
+{
+    ExpressionElement *element = malloc(sizeof(ExpressionElement));
+    element->operation = strdup(operation);
+    element->free = freeExpression;
+    element->eval = evalExpression;
+    return element;
+}
+
+static void freeExpression(ExpressionElement *element)
+{
+    free(element->operation);
+    free(element);
+}
+
+static EvalExpressionData *evalExpression(ExpressionElement *element, SymbolElement **symbolTable)
 {
     EvalExpressionData *expressionData = malloc(sizeof(EvalExpressionData));
     EvalType *evalType = malloc(sizeof(EvalType));

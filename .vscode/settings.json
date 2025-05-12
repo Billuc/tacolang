@@ -1,7 +1,8 @@
 {
     "files.associations": {
         "*.h": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "type_traits": "c"
     },
     "editor.formatOnSave": true
 }

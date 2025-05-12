@@ -8,10 +8,14 @@
 #define M_OPTIONAL "opt"
 
 extern void yyerror(char *s);
+static void freeModifier(ModifierElement *element);
+static EvalModifierData *evalModifier(ModifierElement *element, SymbolElement **symbolTable);
 
 ModifierElement *newModifier(char *type)
 {
     ModifierElement *element = malloc(sizeof(ModifierElement));
+    element->free = freeModifier;
+    element->eval = evalModifier;
 
     if (!strcmp(type, M_MUTABLE))
         element->type = mutable;
@@ -31,7 +35,7 @@ ModifierElement *newModifier(char *type)
     return element;
 }
 
-void freeModifier(ModifierElement *element)
+static void freeModifier(ModifierElement *element)
 {
     if (element == NULL)
         return;
@@ -39,7 +43,7 @@ void freeModifier(ModifierElement *element)
     free(element);
 }
 
-EvalModifierData *evalModifier(ModifierElement *element, SymbolElement **symbolTable)
+static EvalModifierData *evalModifier(ModifierElement *element, SymbolElement **symbolTable)
 {
     EvalModifierData *data = malloc(sizeof(EvalModifierData));
 
@@ -73,7 +77,7 @@ void freeModifierList(ModifierLink *list)
 
     while (iter != NULL)
     {
-        freeModifier(iter->data);
+        iter->data->free(iter->data);
         ModifierLink *next = iter->next;
         free(iter);
         iter = next;
