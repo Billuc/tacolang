@@ -16,7 +16,7 @@ static int calls_to_evalDeclare = 0;
 EvalDeclareData *mock_evalDeclare(DeclareElement *declare, SymbolElement **symbolTable)
 {
     calls_to_evalDeclare++;
-    return NULL; // Mocked return value
+    return NULL; // TODO
 }
 
 DeclareElement *mock_newDeclare(void)
@@ -72,9 +72,12 @@ START_TEST(test_evalVariable)
     VariableElement *variable = newDeclareVariable(mockDeclare);
     SymbolElement *mockSymbolTable = NULL;
 
-    variable->eval(variable, &mockSymbolTable);
+    EvalVariableData *data = variable->eval(variable, &mockSymbolTable);
     ck_assert_int_eq(calls_to_evalDeclare, 1);
 
+    // TODO: Check the data
+
+    free(data);
     variable->free(variable);
 }
 END_TEST

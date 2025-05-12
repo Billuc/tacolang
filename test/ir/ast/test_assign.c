@@ -20,6 +20,20 @@ void mock_freeValue(ValueElement *value)
     free(value);
 }
 
+static int calls_to_evalVariable = 0;
+EvalVariableData *mock_evalVariable(VariableElement *variable, SymbolElement **symbolTable)
+{
+    calls_to_evalVariable++;
+    return NULL; // TODO
+}
+
+static int calls_to_evalValue = 0;
+EvalValueData *mock_evalValue(ValueElement *value, SymbolElement **symbolTable)
+{
+    calls_to_evalValue++;
+    return NULL; // TODO
+}
+
 VariableElement *mock_newVariable(void)
 {
     VariableElement *variable = malloc(sizeof(VariableElement));
@@ -40,6 +54,8 @@ static void setup(void)
 {
     calls_to_freeVariable = 0;
     calls_to_freeValue = 0;
+    calls_to_evalVariable = 0;
+    calls_to_evalValue = 0;
 }
 
 static void teardown(void)
@@ -79,6 +95,22 @@ START_TEST(test_evalAssign)
 }
 END_TEST
 
+START_TEST(test_evalAssign_typeCheck)
+{
+    VariableElement *mockVar = mock_newVariable();
+    ValueElement *mockVal = mock_newValue();
+    AssignElement *assign = newAssign(mockVar, mockVal);
+    SymbolElement *mockSymbolTable = NULL;
+
+    // TODO
+    assign->eval(assign, &mockSymbolTable);
+
+    assign->free(assign);
+    ck_assert_int_eq(calls_to_freeVariable, 1);
+    ck_assert_int_eq(calls_to_freeValue, 1);
+}
+END_TEST
+
 Suite *test_assign_suite(void)
 {
     Suite *s;
@@ -90,6 +122,7 @@ Suite *test_assign_suite(void)
     tcase_add_checked_fixture(tc_assign, setup, teardown);
     tcase_add_test(tc_assign, test_newAssign);
     tcase_add_test(tc_assign, test_evalAssign);
+    tcase_add_test(tc_assign, test_evalAssign_typeCheck);
     suite_add_tcase(s, tc_assign);
 
     return s;

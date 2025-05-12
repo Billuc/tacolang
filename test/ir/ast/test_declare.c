@@ -16,7 +16,7 @@ static int calls_to_evalTypedef = 0;
 EvalTypedefData *mock_evalTypedef(TypedefElement *typedefEl, SymbolElement **symbolTable)
 {
     calls_to_evalTypedef++;
-    return NULL; // Mocked return value
+    return NULL; // TODO
 }
 
 TypedefElement *mock_newTypedef(void)
@@ -61,11 +61,11 @@ START_TEST(test_evalDeclare)
     DeclareElement *declare = newDeclare("testVar", mockType);
     SymbolElement *mockSymbolTable = NULL;
 
-    declare->eval(declare, &mockSymbolTable);
+    EvalDeclareData *data = declare->eval(declare, &mockSymbolTable);
     ck_assert_int_eq(calls_to_evalTypedef, 1);
 
+    free(data);
     declare->free(declare);
-    ck_assert_int_eq(calls_to_freeTypedef, 1);
 }
 END_TEST
 

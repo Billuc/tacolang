@@ -32,14 +32,15 @@ END_TEST
 
 START_TEST(test_evalExpression)
 {
-    ValueElement *mockValue = mock_newValue();
     ExpressionElement *expression = newExpression("+");
     SymbolElement *mockSymbolTable = NULL;
 
-    expression->eval(expression, &mockSymbolTable);
+    EvalExpressionData *data = expression->eval(expression, &mockSymbolTable);
 
+    // TODO : Check the data
+
+    free(data);
     expression->free(expression);
-    ck_assert_int_eq(calls_to_freeValue, 0); // No dependency on ValueElement here
 }
 END_TEST
 
