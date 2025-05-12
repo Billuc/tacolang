@@ -84,14 +84,11 @@ void evalStatementList(StatementLink *list, SymbolElement **symbolTable)
     while (iter != NULL)
     {
         iter->element->eval(iter->element, symbolTable);
-        iter = iter->next;
+        StatementLink *next = iter->next;
+        free(iter); // Free the node and not its element as it is a shallow copy
+        iter = next;
     }
 
-    // Free the symbol table
-    if (symbolTable != NULL)
-    {
-        freeSymbolTable(*symbolTable);
-        // free(symbolTable); // Segfault here
-        symbolTable = NULL; // Set to NULL to avoid dangling pointer
-    }
+    // Free the resources
+    freeSymbolTable(*symbolTable);
 }

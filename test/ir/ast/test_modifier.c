@@ -67,6 +67,7 @@ START_TEST(test_evalModifier)
     ck_assert_int_eq(evalData->typeModifier.modifier_type, tm_mutable);
 
     free(evalData);
+    mod->free(mod);
 }
 
 START_TEST(test_addModifier)

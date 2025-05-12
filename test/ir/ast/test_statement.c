@@ -1,17 +1,18 @@
 #include <check.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "ir/ast/statement.h"
 
 /* ------------------------ MOCKS ------------------------ */
 
-int calls_to_freeAssign = 0;
+static int calls_to_freeAssign = 0;
 void mock_freeAssign(AssignElement *assign)
 {
     calls_to_freeAssign++;
     free(assign);
 }
 
-int calls_to_evalAssign = 0;
+static int calls_to_evalAssign = 0;
 void mock_evalAssign(AssignElement *assign, SymbolElement **symbolTable)
 {
     calls_to_evalAssign++;
@@ -36,7 +37,6 @@ static void setup(void)
 
 static void teardown(void)
 {
-    // No cleanup needed for this test suite
 }
 
 /* ------------------------ TESTS ------------------------ */
@@ -50,8 +50,7 @@ START_TEST(test_newAssignmentStatement)
     ck_assert_int_eq(statement->type, s_assignment);
     ck_assert_ptr_eq(statement->data.assign, mockAssign);
 
-    free(statement);
-    free(mockAssign);
+    statement->free(statement);
 }
 END_TEST
 
@@ -140,7 +139,6 @@ START_TEST(test_evalStatementList)
     ck_assert_int_eq(calls_to_evalAssign, 2);
 
     freeStatementList(list);
-    freeSymbolTable(mockSymbolTable);
 }
 END_TEST
 
@@ -160,7 +158,7 @@ Suite *test_statement_suite(void)
 
     tc_statement_list = tcase_create("StatementList");
 
-    tcase_add_checked_fixture(tc_statement, setup, teardown);
+    tcase_add_checked_fixture(tc_statement_list, setup, teardown);
     tcase_add_test(tc_statement_list, test_addStatement);
     tcase_add_test(tc_statement_list, test_freeStatementList);
     tcase_add_test(tc_statement_list, test_evalStatementList);

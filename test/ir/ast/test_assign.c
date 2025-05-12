@@ -1,43 +1,96 @@
 #include <check.h>
 #include <stdlib.h>
 #include "ir/ast/assign.h"
+#include "ir/ast/variable.h"
+#include "ir/ast/value.h"
 
 /* ------------------------ MOCKS ------------------------ */
 
-// Add mock implementations for functions in assign.c if needed
+static int calls_to_freeVariable = 0;
+void mock_freeVariable(VariableElement *variable)
+{
+    calls_to_freeVariable++;
+    free(variable);
+}
+
+static int calls_to_freeValue = 0;
+void mock_freeValue(ValueElement *value)
+{
+    calls_to_freeValue++;
+    free(value);
+}
+
+VariableElement *mock_newVariable(void)
+{
+    VariableElement *variable = malloc(sizeof(VariableElement));
+    variable->free = mock_freeVariable;
+    return variable;
+}
+
+ValueElement *mock_newValue(void)
+{
+    ValueElement *value = malloc(sizeof(ValueElement));
+    value->free = mock_freeValue;
+    return value;
+}
 
 /* ------------------------ FIXTURES ------------------------ */
 
 static void setup(void)
 {
-    // Initialize any global state or variables
+    calls_to_freeVariable = 0;
+    calls_to_freeValue = 0;
 }
 
 static void teardown(void)
 {
-    // Clean up any global state or variables
 }
 
 /* ------------------------ TESTS ------------------------ */
 
-START_TEST(test_assign_functionality)
+START_TEST(test_newAssign)
 {
-    // Add test cases for functions in assign.c
-    ck_assert_msg(1, "Test not implemented yet");
+    VariableElement *mockVar = mock_newVariable();
+    ValueElement *mockVal = mock_newValue();
+    AssignElement *assign = newAssign(mockVar, mockVal);
+
+    ck_assert_ptr_nonnull(assign);
+    ck_assert_ptr_eq(assign->left, mockVar);
+    ck_assert_ptr_eq(assign->right, mockVal);
+
+    assign->free(assign);
+    ck_assert_int_eq(calls_to_freeVariable, 1);
+    ck_assert_int_eq(calls_to_freeValue, 1);
+}
+END_TEST
+
+START_TEST(test_evalAssign)
+{
+    VariableElement *mockVar = mock_newVariable();
+    ValueElement *mockVal = mock_newValue();
+    AssignElement *assign = newAssign(mockVar, mockVal);
+    SymbolElement *mockSymbolTable = NULL;
+
+    assign->eval(assign, &mockSymbolTable);
+
+    assign->free(assign);
+    ck_assert_int_eq(calls_to_freeVariable, 1);
+    ck_assert_int_eq(calls_to_freeValue, 1);
 }
 END_TEST
 
 Suite *test_assign_suite(void)
 {
     Suite *s;
-    TCase *tc_core;
+    TCase *tc_assign;
 
     s = suite_create("Test assign.c");
-    tc_core = tcase_create("Core");
+    tc_assign = tcase_create("Assign");
 
-    tcase_add_checked_fixture(tc_core, setup, teardown);
-    tcase_add_test(tc_core, test_assign_functionality);
-    suite_add_tcase(s, tc_core);
+    tcase_add_checked_fixture(tc_assign, setup, teardown);
+    tcase_add_test(tc_assign, test_newAssign);
+    tcase_add_test(tc_assign, test_evalAssign);
+    suite_add_tcase(s, tc_assign);
 
     return s;
 }

@@ -34,6 +34,9 @@ SymbolData *getSymbol(SymbolElement *table, char *name)
 
 void freeSymbolTable(SymbolElement *table)
 {
+    if (table == NULL)
+        return;
+
     SymbolElement *iter = table;
     SymbolElement *next = NULL;
 

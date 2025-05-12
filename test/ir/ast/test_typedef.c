@@ -1,43 +1,75 @@
 #include <check.h>
 #include <stdlib.h>
 #include "ir/ast/typedef.h"
+#include "ir/ast/modifier.h"
 
 /* ------------------------ MOCKS ------------------------ */
 
-// Add mock implementations for functions in typedef.c if needed
+static int calls_to_freeModifierList = 0;
+void mock_freeModifierList(ModifierLink *modifiers)
+{
+    calls_to_freeModifierList++;
+    free(modifiers);
+}
+
+ModifierLink *mock_newModifierList(void)
+{
+    ModifierLink *modifiers = malloc(sizeof(ModifierLink));
+    return modifiers;
+}
 
 /* ------------------------ FIXTURES ------------------------ */
 
 static void setup(void)
 {
-    // Initialize any global state or variables
+    calls_to_freeModifierList = 0;
 }
 
 static void teardown(void)
 {
-    // Clean up any global state or variables
 }
 
 /* ------------------------ TESTS ------------------------ */
 
-START_TEST(test_typedef_functionality)
+START_TEST(test_newTypedef)
 {
-    // Add test cases for functions in typedef.c
-    ck_assert_msg(1, "Test not implemented yet");
+    ModifierLink *mockModifiers = mock_newModifierList();
+    TypedefElement *typedefEl = newTypedef(mockModifiers, "int");
+
+    ck_assert_ptr_nonnull(typedefEl);
+    ck_assert_str_eq(typedefEl->name, "int");
+    ck_assert_ptr_eq(typedefEl->modifiers, mockModifiers);
+
+    typedefEl->free(typedefEl);
+    ck_assert_int_eq(calls_to_freeModifierList, 1);
+}
+END_TEST
+
+START_TEST(test_evalTypedef)
+{
+    ModifierLink *mockModifiers = mock_newModifierList();
+    TypedefElement *typedefEl = newTypedef(mockModifiers, "int");
+    SymbolElement *mockSymbolTable = NULL;
+
+    typedefEl->eval(typedefEl, &mockSymbolTable);
+
+    typedefEl->free(typedefEl);
+    ck_assert_int_eq(calls_to_freeModifierList, 1);
 }
 END_TEST
 
 Suite *test_typedef_suite(void)
 {
     Suite *s;
-    TCase *tc_core;
+    TCase *tc_typedef;
 
     s = suite_create("Test typedef.c");
-    tc_core = tcase_create("Core");
+    tc_typedef = tcase_create("Typedef");
 
-    tcase_add_checked_fixture(tc_core, setup, teardown);
-    tcase_add_test(tc_core, test_typedef_functionality);
-    suite_add_tcase(s, tc_core);
+    tcase_add_checked_fixture(tc_typedef, setup, teardown);
+    tcase_add_test(tc_typedef, test_newTypedef);
+    tcase_add_test(tc_typedef, test_evalTypedef);
+    suite_add_tcase(s, tc_typedef);
 
     return s;
 }
