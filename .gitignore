@@ -53,6 +53,7 @@ dkms.conf
 
 # Compilation files
 build/
+test/all_tests
 
 # Generated files
 src/gen/

@@ -76,7 +76,7 @@ $(TEST_BINARY): $(TEST_O_FILES) $(BUILD_O_FILES)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(BUILD_DIR) $(TEST_DIR)/*.o $(TEST_BINARY)
+	rm -rf $(BUILD_DIR) $(TEST_O_FILES) $(TEST_BINARY)
 	@echo "Cleaned build and test directories"
 
 run-tests: $(TEST_BINARY)
