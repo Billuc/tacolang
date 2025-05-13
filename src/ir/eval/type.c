@@ -19,71 +19,78 @@ const struct baseTypeData BASE_TYPES[] = {
 };
 const int BASE_TYPES_LEN = sizeof(BASE_TYPES) / sizeof(BASE_TYPES[0]);
 
-bool type_data_equals(TypeData typeData1, TypeData typeData2)
+int compare_simpleType(SimpleType data1, SimpleType data2)
 {
-    TypeModifierLink *iter1 = typeData1.modifiers;
-    TypeModifierLink *iter2 = typeData2.modifiers;
+    int modifier_compare = compare(data1.modifiers, data2.modifiers, compare_typeModifier);
 
-    while (iter1 != NULL && iter2 != NULL)
-    {
-        if (!type_modifier_equals(iter1->element, iter2->element))
-            return false;
-    }
-    if (iter1 != NULL || iter2 != NULL)
-        return false;
+    if (modifier_compare != 0)
+        return modifier_compare;
 
-    if (typeData1.is_base_type != typeData2.is_base_type)
-        return false;
+    if (data1.is_base_type != data2.is_base_type)
+        return (int)data1.is_base_type - (int)data2.is_base_type;
 
-    if (typeData1.is_base_type)
-        return typeData1.type_data.baseType == typeData2.type_data.baseType;
+    if (data1.is_base_type)
+        return data1.type_data.base_type - data2.type_data.base_type;
     else
-        return strcmp(typeData1.type_data.customType, typeData2.type_data.customType) == 0;
+        return strcmp(data1.type_data.custom_type, data2.type_data.custom_type);
 }
 
-bool function_type_data_equals(FunctionTypeData typeData1, FunctionTypeData typeData2)
+int compare_functionType(FunctionType function1, FunctionType function2)
 {
-    if (typeData1.number_of_args != typeData2.number_of_args)
-        return false;
+    if (function1.number_of_args != function2.number_of_args)
+        return function1.number_of_args - function2.number_of_args;
 
     int i;
-    for (i = 0; i < typeData1.number_of_args; i++)
+    for (i = 0; i < function1.number_of_args; i++)
     {
-        if (!type_data_equals(typeData1.argumentTypes[i], typeData2.argumentTypes[i]))
-            return false;
+        int type_compare = compare_simpleType(function1.argument_types[i], function2.argument_types[i]);
+
+        if (type_compare != 0)
+            return type_compare;
     }
 
-    return type_data_equals(typeData1.returnType, typeData2.returnType);
+    return compare_simpleType(function1.return_type, function2.return_type);
 }
 
-bool struct_type_data_equals(StructTypeData typeData1, StructTypeData typeData2)
+int compare_structType(StructType struct1, StructType struct2)
 {
-    if (typeData1.number_of_fields != typeData2.number_of_fields)
-        return false;
-    if (strcmp(typeData1.name, typeData2.name) != 0)
-        return false;
+    if (struct1.number_of_fields != struct2.number_of_fields)
+        return struct1.number_of_fields - struct2.number_of_fields;
+
+    int name_compare = strcmp(struct1.struct_name, struct2.struct_name);
+    if (name_compare != 0)
+        return name_compare;
 
     int i;
-    for (i = 0; i < typeData1.number_of_fields; i++)
+    for (i = 0; i < struct1.number_of_fields; i++)
     {
-        if (!type_data_equals(typeData1.fields[i].type, typeData2.fields[i].type) || strcmp(typeData1.fields[i].name, typeData2.fields[i].name) != 0)
-            return false;
+        int type_compare = compare_simpleType(struct1.fields[i].field_type, struct2.fields[i].field_type);
+        if (type_compare != 0)
+            return type_compare;
+
+        int field_name_compare = strcmp(struct1.fields[i].field_name, struct2.fields[i].field_name);
+        if (field_name_compare != 0)
+            return field_name_compare;
     }
 
-    return true;
+    return 0;
 }
 
-bool eval_type_equals(EvalType *type1, EvalType *type2)
+int compare_type(Type *type1, Type *type2)
 {
-    if (type1->type != type2->type)
-        return false;
+    if (type1->type_type != type2->type_type)
+        return type1->type_type - type2->type_type;
 
-    switch (type1->type)
+    switch (type1->type_type)
     {
     case t_variable:
-        return type_data_equals(type1->data.variableTypeData, type2->data.variableTypeData);
+        return compare_simpleType(type1->type_data.variable_type, type2->type_data.variable_type);
+    case t_function:
+        return compare_functionType(type1->type_data.function_type, type2->type_data.function_type);
+    case t_structure:
+        return compare_structType(type1->type_data.struct_type, type2->type_data.struct_type);
     default:
-        return false;
+        return 1;
     }
 }
 
@@ -120,35 +127,35 @@ static char *print_base_type(BaseType baseType)
     }
 }
 
-static char *print_type_data(TypeData type)
+static char *print_simpleType(SimpleType type)
 {
     char buf[50] = "";
 
-    TypeModifierLink *iter = type.modifiers;
-    while (iter != NULL)
+    LinkedListElement *iter = type.modifiers->head;
+    for (iter = type.modifiers->head; iter != NULL; iter = iter->next)
     {
-        char *modifier_str = print_type_modifier(iter->element);
+        TypeModifier *modifier = (TypeModifier *)iter->data;
+        char *modifier_str = print_typeModifier(*modifier);
         strcat(buf, modifier_str);
         strcat(buf, ".");
         free(modifier_str);
-        iter = iter->next;
     }
 
     if (type.is_base_type)
     {
-        char *base_type_str = print_base_type(type.type_data.baseType);
+        char *base_type_str = print_baseType(type.type_data.base_type);
         strcat(buf, base_type_str);
         free(base_type_str);
     }
     else
     {
-        strcat(buf, type.type_data.customType);
+        strcat(buf, type.type_data.custom_type);
     }
 
     return strdup(buf);
 }
 
-static char *print_function_type(FunctionTypeData functionType)
+static char *print_functionType(FunctionType functionType)
 {
     char buf[500] = "";
     strcat(buf, "(");
@@ -159,40 +166,83 @@ static char *print_function_type(FunctionTypeData functionType)
         if (i != 0)
             strcat(buf, ", ");
 
-        char *arg_type_str = print_type_data(functionType.argumentTypes[i]);
+        char *arg_type_str = print_simpleType(functionType.argument_types[i]);
         strcat(buf, arg_type_str);
         free(arg_type_str);
     }
 
     strcat(buf, ") -> ");
 
-    char *return_type_str = print_type_data(functionType.returnType);
+    char *return_type_str = print_simpleType(functionType.return_type);
     strcat(buf, return_type_str);
     free(return_type_str);
 
     return strndup(buf, 50);
 }
 
-static char *print_struct_type(StructTypeData structType)
+static char *print_structType(StructType structType)
 {
     char buf[50] = "";
     strcat(buf, "struct ");
-    strcat(buf, structType.name);
+    strcat(buf, structType.struct_name);
 
     return strdup(buf);
 }
 
-char *print_type(EvalType *type)
+char *print_type(Type *type)
 {
-    switch (type->type)
+    switch (type->type_type)
     {
     case t_variable:
-        return print_type_data(type->data.variableTypeData);
+        return print_type_data(type->type_data.variable_type);
     case t_function:
-        return print_function_type(type->data.functionTypeData);
+        return print_function_type(type->type_data.function_type);
     case t_structure:
-        return print_struct_type(type->data.structTypeData);
+        return print_struct_type(type->type_data.struct_type);
     default:
         return strdup("Unknown");
     }
+}
+
+void free_simpleType(SimpleType *simpleType)
+{
+    if (simpleType == NULL)
+        return;
+
+    if (!simpleType->is_base_type)
+        free(simpleType->type_data.custom_type);
+
+    freeLinkedList(simpleType->modifiers);
+}
+
+void free_type(Type *type)
+{
+    if (type == NULL)
+        return;
+
+    if (type->type_type == t_variable)
+    {
+        free_simpleType(&type->type_data.variable_type);
+    }
+    else if (type->type_type == t_function)
+    {
+        int i;
+        for (i = 0; i < type->type_data.function_type.number_of_args; i++)
+        {
+            free_simpleType(&type->type_data.function_type.argument_types[i]);
+        }
+
+        free_simpleType(&type->type_data.function_type.return_type);
+    }
+    else if (type->type_type == t_structure)
+    {
+        free(type->type_data.struct_type.struct_name);
+        int i;
+        for (i = 0; i < type->type_data.struct_type.number_of_fields; i++)
+        {
+            free(type->type_data.struct_type.fields[i].field_name);
+            free_simpleType(&type->type_data.struct_type.fields[i].field_type);
+        }
+    }
+    free(type);
 }

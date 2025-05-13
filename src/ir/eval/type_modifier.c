@@ -1,13 +1,13 @@
 #include <string.h>
 #include "type_modifier.h"
-#include "../../utils/str_utils.h"
+#include "utils/str_utils.h"
 
-bool type_modifier_equals(TypeModifier modifier1, TypeModifier modifier2)
+int compare_typeModifier(TypeModifier *modifier1, TypeModifier *modifier2)
 {
-    return modifier1.modifier_type == modifier2.modifier_type;
+    return modifier1->modifier_type - modifier2->modifier_type;
 }
 
-char *print_type_modifier(TypeModifier modifier)
+char *print_typeModifier(TypeModifier modifier)
 {
     char buf[10] = "";
 
@@ -25,4 +25,9 @@ char *print_type_modifier(TypeModifier modifier)
     }
 
     return strdup(buf);
+}
+
+TypeModifierList *newTypeModifierList()
+{
+    return newLinkedList(NULL);
 }

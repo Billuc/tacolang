@@ -45,7 +45,7 @@ static void evalAssign(AssignElement *assignElement, SymbolElement **symbolTable
     EvalValueData *valueData = assignElement->right->eval(assignElement->right, symbolTable);
     if (valueData == NULL)
     {
-        // free(variableData);
+        free(variableData);
         return;
     }
 

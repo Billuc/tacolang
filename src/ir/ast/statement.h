@@ -3,8 +3,8 @@
 
 #include "assign.h"
 #include "declare.h"
-#include "common.h"
-#include "../symbol_table/symbol_table.h"
+#include "utils/common.h"
+#include "ir/eval/symbol_table.h"
 
 typedef enum
 {
@@ -32,8 +32,6 @@ typedef struct statementLink
 } StatementLink;
 
 StatementElement *newAssignmentStatement(AssignElement *assign);
-// void freeStatement(StatementElement *statementEl);
-// void evalStatement(StatementElement *statementElement, SymbolElement **symbolTable);
 
 StatementLink *addStatement(StatementLink *list, StatementElement *newElement);
 void freeStatementList(StatementLink *list);

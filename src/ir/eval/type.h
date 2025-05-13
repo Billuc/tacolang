@@ -34,36 +34,36 @@ extern const int BASE_TYPES_LEN;               // Defined in type.c
 
 typedef union
 {
-    BaseType baseType;
-    char *customType;
-} Type;
+    BaseType base_type;
+    char *custom_type;
+} SimpleTypeData;
 
 typedef struct
 {
     bool is_base_type;
-    Type type_data;
-    TypeModifierLink *modifiers;
-} TypeData;
+    SimpleTypeData type_data;
+    TypeModifierList *modifiers;
+} SimpleType;
 
 typedef struct
 {
-    TypeData returnType;
+    SimpleType return_type;
     short number_of_args;
-    TypeData argumentTypes[MAX_NB_OF_ARGS];
-} FunctionTypeData;
+    SimpleType argument_types[MAX_NB_OF_ARGS];
+} FunctionType;
 
 typedef struct
 {
-    TypeData type;
-    char *name;
+    SimpleType field_type;
+    char *field_name;
 } StructField;
 
 typedef struct
 {
-    char *name;
+    char *struct_name;
     short number_of_fields;
     StructField fields[MAX_NB_OF_FIELDS];
-} StructTypeData;
+} StructType;
 
 typedef enum
 {
@@ -74,22 +74,24 @@ typedef enum
 
 typedef union
 {
-    TypeData variableTypeData;
-    FunctionTypeData functionTypeData;
-    StructTypeData structTypeData;
-} EvalTypeData;
+    SimpleType variable_type;
+    FunctionType function_type;
+    StructType struct_type;
+} TypeData;
 
 typedef struct
 {
-    TypeType type;
-    EvalTypeData data;
-} EvalType;
+    TypeType type_type;
+    TypeData type_data;
+} Type;
 
-bool type_data_equals(TypeData typeData1, TypeData typeData2);
-bool function_type_data_equals(FunctionTypeData typeData1, FunctionTypeData typeData2);
-bool struct_type_data_equals(StructTypeData typeData1, StructTypeData typeData2);
-bool eval_type_equals(EvalType *type1, EvalType *type2);
+int compare_simpleType(SimpleType data1, SimpleType data2);
+int compare_functionType(FunctionType function1, FunctionType function2);
+int compare_structType(StructType struct1, StructType struct2);
+int compare_type(Type *type1, Type *type2);
 
-char *print_type(EvalType *type);
+char *print_type(Type *type);
+void free_simpleType(SimpleType *simpleType);
+void free_type(Type *type);
 
 #endif // TYPE_H__

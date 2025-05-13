@@ -1,12 +1,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include "typedef.h"
-#include "../../utils/str_utils.h"
+#include "utils/str_utils.h"
+#include "utils/list_utils.h"
 
 static void freeTypedef(TypedefElement *element);
-static EvalTypedefData *evalTypedef(TypedefElement *typedefElement, SymbolElement **symbolTable);
+static TypedefData *evalTypedef(TypedefElement *typedefElement, SymbolElement **symbolTable);
 
-TypedefElement *newTypedef(ModifierLink *modifiers, char *name)
+TypedefElement *newTypedef(ModifierList *modifiers, char *name)
 {
     TypedefElement *element = malloc(sizeof(TypedefElement));
     element->modifiers = modifiers;
@@ -18,15 +19,25 @@ TypedefElement *newTypedef(ModifierLink *modifiers, char *name)
 
 static void freeTypedef(TypedefElement *element)
 {
-    freeModifierList(element->modifiers);
+    freeLinkedList(element->modifiers);
     free(element->name);
     free(element);
 }
 
-static EvalTypedefData *evalTypedef(TypedefElement *typedefElement, SymbolElement **symbolTable)
+static void freeTypedefData(TypedefData *data)
 {
-    EvalTypedefData *evalData = malloc(sizeof(EvalTypedefData));
+    free_evalType(data->type);
+    free(data);
+}
+
+static TypedefData *evalTypedef(TypedefElement *typedefElement, SymbolElement **symbolTable)
+{
+    TypedefData *evalData = malloc(sizeof(TypedefData));
+    evalData->free = freeTypedefData;
+
     EvalType *evalType = malloc(sizeof(EvalType));
+    evalType->type = t_variable;
+    evalType->data.variableTypeData.modifiers;
 
     EvalModifierLinkData *modifiers = evalModifierList(typedefElement->modifiers, symbolTable);
     evalType->type = t_variable;

@@ -9,7 +9,7 @@
 
 extern void yyerror(char *s);
 static void freeModifier(ModifierElement *element);
-static EvalModifierData *evalModifier(ModifierElement *element, SymbolElement **symbolTable);
+static ModifierData *evalModifier(ModifierElement *element, SymbolElement **symbolTable);
 
 ModifierElement *newModifier(char *type)
 {
@@ -18,11 +18,11 @@ ModifierElement *newModifier(char *type)
     element->eval = evalModifier;
 
     if (!strcmp(type, M_MUTABLE))
-        element->type = mutable;
+        element->type = m_mutable;
     else if (!strcmp(type, M_REFERENCE))
-        element->type = reference;
+        element->type = m_reference;
     else if (!strcmp(type, M_OPTIONAL))
-        element->type = optional;
+        element->type = m_optional;
     else
     {
         char buf[100];
@@ -43,62 +43,39 @@ static void freeModifier(ModifierElement *element)
     free(element);
 }
 
-static EvalModifierData *evalModifier(ModifierElement *element, SymbolElement **symbolTable)
+static void freeModifierData(ModifierData *data)
 {
-    EvalModifierData *data = malloc(sizeof(EvalModifierData));
+    if (data == NULL)
+        return;
+
+    if (data->typeModifier != NULL)
+        data->typeModifier->free(data->typeModifier);
+
+    free(data);
+}
+
+static ModifierData *evalModifier(ModifierElement *element, SymbolElement **symbolTable)
+{
+    ModifierData *data = malloc(sizeof(ModifierData));
+    data->free = freeModifierData;
 
     switch (element->type)
     {
-    case mutable:
-        data->typeModifier.modifier_type = tm_mutable;
+    case m_mutable:
+        data->typeModifier->modifier_type = tm_mutable;
         break;
-    case reference:
-        data->typeModifier.modifier_type = tm_reference;
+    case m_reference:
+        data->typeModifier->modifier_type = tm_reference;
         break;
-    case optional:
-        data->typeModifier.modifier_type = tm_optional;
+    case m_optional:
+        data->typeModifier->modifier_type = tm_optional;
         break;
     }
 
     return data;
 }
 
-ModifierLink *addModifier(ModifierLink *list, ModifierElement *newElement)
+ModifierList *newModifierList()
 {
-    ModifierLink *newHead = malloc(sizeof(ModifierLink));
-    newHead->data = newElement;
-    newHead->next = list;
-    return newHead;
-}
-
-void freeModifierList(ModifierLink *list)
-{
-    ModifierLink *iter = list;
-
-    while (iter != NULL)
-    {
-        iter->data->free(iter->data);
-        ModifierLink *next = iter->next;
-        free(iter);
-        iter = next;
-    }
-}
-
-EvalModifierLinkData *evalModifierList(ModifierLink *list, SymbolElement **symbolTable)
-{
-    EvalModifierLinkData *data = malloc(sizeof(EvalModifierLinkData));
-    data->typeModifierList = NULL;
-    ModifierLink *iter = list;
-
-    while (iter != NULL)
-    {
-        EvalModifierData *iterData = evalModifier(iter->data, symbolTable);
-        TypeModifierLink *newHead = malloc(sizeof(TypeModifierLink));
-        newHead->element = iterData->typeModifier;
-        newHead->next = data->typeModifierList;
-        data->typeModifierList = newHead;
-        iter = iter->next;
-    }
-
-    return data;
+    return newLinkedList(freeModifier);
 }

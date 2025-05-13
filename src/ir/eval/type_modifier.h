@@ -1,7 +1,7 @@
 #if !defined(TYPE_MODIFIER_H__)
 #define TYPE_MODIFIER_H__
 
-#include <stdbool.h>
+#include "utils/list_utils.h"
 
 typedef enum
 {
@@ -15,19 +15,16 @@ typedef union
 
 } TypeModifierData;
 
-typedef struct
+typedef struct typeModifier
 {
     TypeModifierType modifier_type;
     TypeModifierData modifier_data;
 } TypeModifier;
 
-typedef struct typeModifierLink
-{
-    TypeModifier element;
-    struct typeModifierLink *next;
-} TypeModifierLink;
+typedef LinkedList TypeModifierList;
 
-bool type_modifier_equals(TypeModifier modifier1, TypeModifier modifier2);
-char *print_type_modifier(TypeModifier modifier);
+int compare_typeModifier(TypeModifier *modifier1, TypeModifier *modifier2);
+char *print_typeModifier(TypeModifier modifier);
+TypeModifierList *newTypeModifierList();
 
 #endif // TYPE_MODIFIER_H__

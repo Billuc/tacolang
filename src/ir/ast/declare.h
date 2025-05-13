@@ -3,13 +3,15 @@
 
 #include "value.h"
 #include "typedef.h"
-#include "common.h"
-#include "../symbol_table/symbol_table.h"
+#include "utils/common.h"
+#include "ir/eval/symbol_table.h"
 
-typedef struct
+typedef struct evalDeclareData
 {
     char *symbolName;
     EvalType *symbolType;
+
+    FREE_FUNC(struct evalDeclareData, free);
 } EvalDeclareData;
 
 typedef struct declareElement
@@ -22,7 +24,5 @@ typedef struct declareElement
 } DeclareElement;
 
 DeclareElement *newDeclare(char *name, TypedefElement *type);
-// void freeDeclare(DeclareElement *declareEl);
-// EvalDeclareData *evalDeclare(DeclareElement *declareElement, SymbolElement **symbolTable);
 
 #endif // DECLARE_H__

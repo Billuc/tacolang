@@ -2,12 +2,14 @@
 #define EXPRESSION_H__
 
 #include "common.h"
-#include "../symbol_table/symbol_table.h"
-#include "../eval/type.h"
+#include "ir/eval/symbol_table.h"
+#include "ir/eval/type.h"
 
-typedef struct
+typedef struct expressionElement
 {
     EvalType *type;
+
+    FREE_FUNC(struct expressionElement, free);
 } EvalExpressionData;
 
 typedef struct expressionElement
@@ -19,7 +21,5 @@ typedef struct expressionElement
 } ExpressionElement;
 
 ExpressionElement *newExpression(char *operation);
-// void freeExpression(ExpressionElement *expressionEl);
-// EvalExpressionData *evalExpression(ExpressionElement *expressionElement, SymbolElement **symbolTable);
 
 #endif // EXPRESSION_H__

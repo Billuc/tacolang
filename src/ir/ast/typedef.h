@@ -3,24 +3,24 @@
 
 #include "modifier.h"
 #include "common.h"
-#include "../symbol_table/symbol_table.h"
+#include "ir/eval/symbol_table.h"
 
-typedef struct
+typedef struct typedefData
 {
     EvalType *type;
-} EvalTypedefData;
+
+    FREE_FUNC(struct typedefData, free);
+} TypedefData;
 
 typedef struct typedefElement
 {
     char *name;
-    ModifierLink *modifiers;
+    ModifierList *modifiers;
 
     FREE_FUNC(struct typedefElement, free);
-    EVAL_FUNC(struct typedefElement, EvalTypedefData *, eval);
+    EVAL_FUNC(struct typedefElement, TypedefData *, eval);
 } TypedefElement;
 
-TypedefElement *newTypedef(ModifierLink *modifiers, char *name);
-// void freeTypedef(TypedefElement *typedefEl);
-// EvalTypedefData *evalTypedef(TypedefElement *typedefElement, SymbolElement **symbolTable);
+TypedefElement *newTypedef(ModifierList *modifiers, char *name);
 
 #endif // TYPEDEF_H__

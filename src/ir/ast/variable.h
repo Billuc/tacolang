@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include "declare.h"
 #include "common.h"
-#include "../symbol_table/symbol_table.h"
+#include "ir/eval/symbol_table.h"
 #include "../eval/type.h"
 
 typedef enum

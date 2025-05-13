@@ -24,7 +24,7 @@ void yyerror(const char* s);
     AssignElement *assign;
     DeclareElement *declare;
     ExpressionElement *expression;
-    ModifierLink *modifierList;
+    ModifierList *modifierList;
     ModifierElement *modifier;
     StatementElement *statement;
     StatementLink *statementList;
@@ -80,8 +80,8 @@ expression: '.' { $$ = newExpression("."); }
 
 typedef: modifiers TYPEDEF { $$ = newTypedef($1, $2); }
 
-modifiers: /* empty */ { $$ = NULL; }
-    | modifiers modifier '.' { $$ = addModifier($1, $2); }
+modifiers: /* empty */ { $$ = newModifierList(); }
+    | modifiers modifier '.' { $$ = push($1, $2); }
 
 modifier: MODIFIER { $$ = newModifier($1); }
 
