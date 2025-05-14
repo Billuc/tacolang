@@ -31,3 +31,10 @@ TypeModifierList *newTypeModifierList()
 {
     return newLinkedList(NULL);
 }
+
+TypeModifier *copy_typeModifier(TypeModifier *toCopy)
+{
+    TypeModifier *copy = malloc(sizeof(TypeModifier));
+    copy->modifier_type = toCopy->modifier_type;
+    return copy;
+}

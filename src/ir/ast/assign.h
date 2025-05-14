@@ -1,18 +1,17 @@
 #if !defined(ASSIGN_H__)
 #define ASSIGN_H__
 
-#include "value.h"
-#include "variable.h"
-#include "utils/common.h"
-#include "ir/eval/symbol_table.h"
+#include "./value.h"
+#include "./variable.h"
+#include "ir/eval/context.h"
 
 typedef struct assignElement
 {
     VariableElement *left;
     ValueElement *right;
 
-    FREE_FUNC(struct assignElement, free);
-    EVAL_FUNC(struct assignElement, void, eval);
+    void (*free)(struct assignElement *);
+    void (*eval)(struct assignElement *, EvalContext *);
 } AssignElement;
 
 AssignElement *newAssign(VariableElement *left, ValueElement *right);

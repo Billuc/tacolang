@@ -1,15 +1,14 @@
 #if !defined(TYPEDEF_H__)
 #define TYPEDEF_H__
 
-#include "modifier.h"
-#include "common.h"
-#include "ir/eval/symbol_table.h"
+#include "./modifier.h"
+#include "ir/eval/context.h"
 
 typedef struct typedefData
 {
-    EvalType *type;
+    Type *type;
 
-    FREE_FUNC(struct typedefData, free);
+    void (*free)(struct typedefData *);
 } TypedefData;
 
 typedef struct typedefElement
@@ -17,8 +16,8 @@ typedef struct typedefElement
     char *name;
     ModifierList *modifiers;
 
-    FREE_FUNC(struct typedefElement, free);
-    EVAL_FUNC(struct typedefElement, TypedefData *, eval);
+    void (*free)(struct typedefElement *);
+    TypedefData *(*eval)(struct typedefElement *, EvalContext *);
 } TypedefElement;
 
 TypedefElement *newTypedef(ModifierList *modifiers, char *name);

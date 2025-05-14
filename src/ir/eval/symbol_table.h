@@ -12,7 +12,7 @@ typedef struct symbolData
 
 typedef LinkedList SymbolTable;
 
-SymbolTable *createSymbolTable();
-int compareSymbolData(void *a, void *b);
+SymbolTable *create_SymbolTable();
+int compare_SymbolData(void *a, void *b);
 
 #endif

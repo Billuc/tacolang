@@ -1,15 +1,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include "expression.h"
-#include "../../utils/str_utils.h"
+#include "utils/str_utils.h"
 
 static void freeExpression(ExpressionElement *element);
-static EvalExpressionData *evalExpression(ExpressionElement *element, SymbolElement **symbolTable);
+static ExpressionData *evalExpression(ExpressionElement *element, EvalContext *context);
 
 // TODO : remove
-static const TypeData intTypeData = {
+static const SimpleType intTypeData = {
     .is_base_type = true,
-    .type_data = {.baseType = U32},
+    .type_data = {.base_type = U32},
     .modifiers = NULL,
 };
 
@@ -28,14 +28,22 @@ static void freeExpression(ExpressionElement *element)
     free(element);
 }
 
-static EvalExpressionData *evalExpression(ExpressionElement *element, SymbolElement **symbolTable)
+static void freeExpressionData(ExpressionData *data)
 {
-    EvalExpressionData *expressionData = malloc(sizeof(EvalExpressionData));
-    EvalType *evalType = malloc(sizeof(EvalType));
+    free_type(data->type);
+    free(data);
+}
+
+static ExpressionData *evalExpression(ExpressionElement *element, EvalContext *context)
+{
+    ExpressionData *expressionData = malloc(sizeof(ExpressionData));
+    expressionData->free = freeExpressionData;
+
+    Type *exp_type = malloc(sizeof(Type));
     // TODO: adapt
-    EvalTypeData etd = {.variableTypeData = intTypeData};
-    evalType->type = t_variable;
-    evalType->data = etd;
-    expressionData->type = evalType;
+    TypeData etd = {.variable_type = intTypeData};
+    exp_type->type_type = t_variable;
+    exp_type->type_data = etd;
+    expressionData->type = exp_type;
     return expressionData;
 }

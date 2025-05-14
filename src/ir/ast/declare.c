@@ -2,11 +2,11 @@
 #include <stdio.h>
 #include <string.h>
 #include "declare.h"
-#include "../../utils/str_utils.h"
+#include "utils/str_utils.h"
 
 extern void yyerror(char *s);
 static void freeDeclare(DeclareElement *element);
-static EvalDeclareData *evalDeclare(DeclareElement *declareElement, SymbolElement **symbolTable);
+static DeclareData *evalDeclare(DeclareElement *declareElement, EvalContext *context);
 
 DeclareElement *newDeclare(char *name, TypedefElement *type)
 {
@@ -25,10 +25,17 @@ void freeDeclare(DeclareElement *element)
     free(element);
 }
 
-EvalDeclareData *evalDeclare(DeclareElement *declareElement, SymbolElement **symbolTable)
+static void freeDeclareData(DeclareData *data)
+{
+    free(data->symbol_name);
+    free_type(data->symbol_type);
+    free(data);
+}
+
+DeclareData *evalDeclare(DeclareElement *declareElement, EvalContext *context)
 {
     char *variableName = declareElement->name;
-    SymbolData *symbol = getSymbol(*symbolTable, variableName);
+    SymbolData *symbol = findSymbol(context, variableName);
 
     if (symbol != NULL)
     {
@@ -38,19 +45,19 @@ EvalDeclareData *evalDeclare(DeclareElement *declareElement, SymbolElement **sym
         return NULL;
     }
 
-    EvalTypedefData *typedefData = declareElement->type->eval(declareElement->type, symbolTable);
+    TypedefData *typedefData = declareElement->type->eval(declareElement->type, context);
 
     SymbolData *newSymbol = malloc(sizeof(SymbolData));
     newSymbol->name = strdup(declareElement->name);
-    newSymbol->type = typedefData->type;
-    SymbolElement *newHead = putSymbol(*symbolTable, newSymbol);
-    *symbolTable = newHead;
+    newSymbol->type = copy_type(typedefData->type);
+    putSymbol(context, newSymbol);
 
-    EvalType *evalType = malloc(sizeof(EvalType));
-    memcpy(evalType, typedefData->type, sizeof(EvalType));
+    DeclareData *data = malloc(sizeof(DeclareData));
+    data->free = freeDeclareData;
+    data->symbol_name = strdup(variableName);
+    data->symbol_type = copy_type(typedefData->type);
 
-    EvalDeclareData *data = malloc(sizeof(EvalDeclareData));
-    data->symbolName = strdup(variableName);
-    data->symbolType = evalType;
+    typedefData->free(typedefData);
+
     return data;
 }

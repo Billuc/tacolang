@@ -2,41 +2,40 @@
 #define VARIABLE_H__
 
 #include <stdbool.h>
-#include "declare.h"
-#include "common.h"
-#include "ir/eval/symbol_table.h"
-#include "../eval/type.h"
+#include "./declare.h"
+#include "ir/eval/type.h"
+#include "ir/eval/context.h"
 
 typedef enum
 {
     var_identifier,
     var_declare,
-} VariableType;
+} VariableElementType;
 
 typedef union
 {
     DeclareElement *declare;
     char *identifier;
-} VariableData;
+} VariableElementData;
 
-typedef struct
+typedef struct variableData
 {
-    EvalType *variableType;
-    bool isDeclaration;
-} EvalVariableData;
+    Type *variable_type;
+    bool is_declaration;
+
+    void (*free)(struct variableData *);
+} VariableData;
 
 typedef struct variableElement
 {
-    VariableType type;
-    VariableData data;
+    VariableElementType element_type;
+    VariableElementData element_data;
 
-    FREE_FUNC(struct variableElement, free);
-    EVAL_FUNC(struct variableElement, EvalVariableData *, eval);
+    void (*free)(struct variableElement *);
+    VariableData *(*eval)(struct variableElement *, EvalContext *);
 } VariableElement;
 
 VariableElement *newIdentifierVariable(char *identifier);
 VariableElement *newDeclareVariable(DeclareElement *declare);
-// void freeVariable(VariableElement *variableEl);
-// EvalVariableData *evalVariable(VariableElement *variableElement, SymbolElement **symbolTable);
 
 #endif // VARIABLE_H__

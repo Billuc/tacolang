@@ -7,9 +7,13 @@
 typedef struct evalContext
 {
     LinkedList *symbolTableStack;
+    // Generated code
 
+    void (*free)(struct evalContext *);
 } EvalContext;
 
+EvalContext *newEvalContext();
 SymbolData *findSymbol(EvalContext *context, char *name);
+void putSymbol(EvalContext *context, SymbolData *symbol);
 
 #endif // CONTEXT_H__

@@ -1,10 +1,10 @@
 #if !defined(STATEMENT_H__)
 #define STATEMENT_H__
 
-#include "assign.h"
-#include "declare.h"
-#include "utils/common.h"
-#include "ir/eval/symbol_table.h"
+#include "./assign.h"
+#include "./declare.h"
+#include "ir/eval/context.h"
+#include "utils/list_utils.h"
 
 typedef enum
 {
@@ -14,27 +14,20 @@ typedef enum
 typedef union
 {
     AssignElement *assign;
-} StatementData;
+} Statement;
 
 typedef struct statementElement
 {
     StatementType type;
-    StatementData data;
+    Statement statement;
 
-    FREE_FUNC(struct statementElement, free);
-    EVAL_FUNC(struct statementElement, void, eval);
+    void (*free)(struct statementElement *);
+    void (*eval)(struct statementElement *, EvalContext *);
 } StatementElement;
 
-typedef struct statementLink
-{
-    StatementElement *element;
-    struct statementLink *next;
-} StatementLink;
+typedef LinkedList StatementList;
 
 StatementElement *newAssignmentStatement(AssignElement *assign);
-
-StatementLink *addStatement(StatementLink *list, StatementElement *newElement);
-void freeStatementList(StatementLink *list);
-void evalStatementList(StatementLink *list, SymbolElement **symbolTable);
+StatementList *newStatementList();
 
 #endif // STATEMENT_H__

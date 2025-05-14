@@ -1,6 +1,6 @@
 # Compiler and flags
 CC = gcc
-CFLAGS = -g -Isrc -Wall
+CFLAGS = -g -Isrc -Wall -Wno-incompatible-pointer-types
 LDFLAGS = -lcheck
 LEX = flex
 BISON = bison

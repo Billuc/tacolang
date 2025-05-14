@@ -14,6 +14,7 @@ void yyerror(const char* s);
 #include "ir/ast/declare.h"
 #include "ir/ast/expression.h"
 #include "ir/ast/modifier.h"
+#include "ir/ast/program.h"
 #include "ir/ast/statement.h"
 #include "ir/ast/typedef.h"
 #include "ir/ast/value.h"
@@ -26,8 +27,9 @@ void yyerror(const char* s);
     ExpressionElement *expression;
     ModifierList *modifierList;
     ModifierElement *modifier;
+    ProgramElement *program;
     StatementElement *statement;
-    StatementLink *statementList;
+    StatementList *statementList;
     TypedefElement *typeDef;
     ValueElement *value;
     VariableElement *variable;
@@ -44,6 +46,7 @@ void yyerror(const char* s);
 %type <expression> expression
 %type <modifierList> modifiers
 %type <modifier> modifier
+%type <program> program
 %type <statement> statement
 %type <statementList> statements
 %type <typeDef> typedef
@@ -53,10 +56,10 @@ void yyerror(const char* s);
 %start program
 
 %%
-program: statements { evalStatementList($1, NULL); }
+program: statements { $$ = newProgram($1); eval($$); }
 
-statements: /* empty */ { $$ = NULL; }
-    | statements statement ENDSTMT { $$ = addStatement($1, $2); }
+statements: /* empty */ { $$ = newStatementList(); }
+    | statements statement ENDSTMT { push($1, $2); $$ = $1; }
 ;
 
 statement: /* empty */ { $$ = NULL; }
@@ -81,7 +84,7 @@ expression: '.' { $$ = newExpression("."); }
 typedef: modifiers TYPEDEF { $$ = newTypedef($1, $2); }
 
 modifiers: /* empty */ { $$ = newModifierList(); }
-    | modifiers modifier '.' { $$ = push($1, $2); }
+    | modifiers modifier '.' { push($1, $2); $$ = $1; }
 
 modifier: MODIFIER { $$ = newModifier($1); }
 

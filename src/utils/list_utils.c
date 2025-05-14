@@ -18,6 +18,9 @@ LinkedList *newLinkedList(void (*freeData)(void *))
 
 void freeLinkedList(LinkedList *list)
 {
+    if (list == NULL)
+        return;
+
     LinkedListElement *current = list->head;
     LinkedListElement *next;
 
@@ -34,6 +37,9 @@ void freeLinkedList(LinkedList *list)
 
 void push(LinkedList *list, void *data)
 {
+    if (data == NULL)
+        return;
+
     LinkedListElement *newElement = malloc(sizeof(LinkedListElement));
     newElement->data = data;
     newElement->next = NULL;
@@ -104,6 +110,13 @@ void *find(LinkedList *list, void *data, int (*compare)(void *, void *))
 
 int compare(LinkedList *list1, LinkedList *list2, int (*compare)(void *, void *))
 {
+    if (list1 == NULL && list2 == NULL)
+        return 0;
+    if (list1 == NULL)
+        return -1;
+    if (list2 == NULL)
+        return 1;
+
     if (list1->size != list2->size)
     {
         return list1->size - list2->size;
@@ -134,4 +147,30 @@ int compare(LinkedList *list1, LinkedList *list2, int (*compare)(void *, void *)
     if (current2 != NULL)
         return -1;
     return 0;
+}
+
+LinkedList *map(LinkedList *list, void *(*map)(void *), void (*freeData)(void *))
+{
+    LinkedList *newList = newLinkedList(freeData);
+    LinkedListElement *current;
+
+    for (current = list->head; current != NULL; current = current->next)
+    {
+        push(newList, map(current->data));
+    }
+
+    return newList;
+}
+
+LinkedList *copy(LinkedList *list, void *(*copyElement)(void *))
+{
+    LinkedList *newList = newLinkedList(list->freeData);
+    LinkedListElement *current;
+
+    for (current = list->head; current != NULL; current = current->next)
+    {
+        push(newList, copyElement(current->data));
+    }
+
+    return newList;
 }

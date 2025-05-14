@@ -94,7 +94,7 @@ int compare_type(Type *type1, Type *type2)
     }
 }
 
-static char *print_base_type(BaseType baseType)
+static char *print_baseType(BaseType baseType)
 {
     switch (baseType)
     {
@@ -194,11 +194,11 @@ char *print_type(Type *type)
     switch (type->type_type)
     {
     case t_variable:
-        return print_type_data(type->type_data.variable_type);
+        return print_simpleType(type->type_data.variable_type);
     case t_function:
-        return print_function_type(type->type_data.function_type);
+        return print_functionType(type->type_data.function_type);
     case t_structure:
-        return print_struct_type(type->type_data.struct_type);
+        return print_structType(type->type_data.struct_type);
     default:
         return strdup("Unknown");
     }
@@ -245,4 +245,49 @@ void free_type(Type *type)
         }
     }
     free(type);
+}
+
+void copy_simpleType(SimpleType *toCopy, SimpleType *copied)
+{
+    copied->is_base_type = toCopy->is_base_type;
+    copied->modifiers = copy(toCopy->modifiers, copy_typeModifier);
+
+    if (toCopy->is_base_type)
+        copied->type_data.base_type = toCopy->type_data.base_type;
+    else
+        copied->type_data.custom_type = strdup(toCopy->type_data.custom_type);
+}
+
+Type *copy_type(Type *toCopy)
+{
+    Type *copied = malloc(sizeof(Type));
+    copied->type_type = toCopy->type_type;
+
+    switch (toCopy->type_type)
+    {
+    case t_variable:
+        copy_simpleType(&toCopy->type_data.variable_type, &copied->type_data.variable_type);
+        break;
+    case t_function:
+        copied->type_data.function_type.number_of_args = toCopy->type_data.function_type.number_of_args;
+        copy_simpleType(&toCopy->type_data.function_type.return_type, &copied->type_data.function_type.return_type);
+        for (int i = 0; i < toCopy->type_data.function_type.number_of_args; i++)
+        {
+            copy_simpleType(&toCopy->type_data.function_type.argument_types[i], &copied->type_data.function_type.argument_types[i]);
+        }
+        break;
+    case t_structure:
+        copied->type_data.struct_type.number_of_fields = toCopy->type_data.struct_type.number_of_fields;
+        copied->type_data.struct_type.struct_name = strdup(toCopy->type_data.struct_type.struct_name);
+        for (int i = 0; i < toCopy->type_data.struct_type.number_of_fields; i++)
+        {
+            copied->type_data.struct_type.fields[i].field_name = strdup(toCopy->type_data.struct_type.fields[i].field_name);
+            copy_simpleType(&toCopy->type_data.struct_type.fields[i].field_type, &copied->type_data.struct_type.fields[i].field_type);
+        }
+        break;
+    default:
+        break;
+    }
+
+    return copied;
 }

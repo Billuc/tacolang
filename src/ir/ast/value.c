@@ -2,16 +2,16 @@
 #include "value.h"
 
 static void freeValue(ValueElement *valueEl);
-static EvalValueData *evalValue(ValueElement *valueElement, SymbolElement **symbolTable);
+static ValueData *evalValue(ValueElement *valueElement, EvalContext *context);
 
-static const TypeData intTypeData = {
+static const SimpleType intTypeData = {
     .is_base_type = true,
-    .type_data = {.baseType = U32},
+    .type_data = {.base_type = U32},
     .modifiers = NULL,
 };
-static const TypeData floatTypeData = {
+static const SimpleType floatTypeData = {
     .is_base_type = true,
-    .type_data = {.baseType = F32},
+    .type_data = {.base_type = F32},
     .modifiers = NULL,
 };
 
@@ -53,35 +53,46 @@ static void freeValue(ValueElement *valueEl)
     free(valueEl);
 }
 
-static EvalValueData *evalValue(ValueElement *valueElement, SymbolElement **symbolTable)
+static void freeValueData(ValueData *valueData)
 {
-    EvalValueData *valueData = malloc(sizeof(EvalValueData));
-    EvalType *evalType;
+    free_type(valueData->value_type);
+    free(valueData);
+}
+
+static ValueData *evalValue(ValueElement *valueElement, EvalContext *context)
+{
+    ValueData *valueData = malloc(sizeof(ValueData));
+    Type *valueType;
 
     switch (valueElement->type)
     {
     case v_integer:
     {
-        evalType = malloc(sizeof(EvalType));
-        evalType->type = t_variable;
-        EvalTypeData int_etd = {.variableTypeData = intTypeData};
-        evalType->data = int_etd;
+        valueType = malloc(sizeof(Type));
+        valueType->type_type = t_variable;
+        TypeData int_td = {.variable_type = intTypeData};
+        valueType->type_data = int_td;
         break;
     }
     case v_floating:
     {
-        evalType = malloc(sizeof(EvalType));
-        evalType->type = t_variable;
-        EvalTypeData float_etd = {.variableTypeData = floatTypeData};
-        evalType->data = float_etd;
+        valueType = malloc(sizeof(Type));
+        valueType->type_type = t_variable;
+        TypeData float_td = {.variable_type = floatTypeData};
+        valueType->type_data = float_td;
         break;
     }
     case v_expression:
-        EvalExpressionData *expressionData = valueElement->value.expression->eval(valueElement->value.expression, symbolTable);
-        evalType = expressionData->type;
+    {
+        ExpressionElement *expression = valueElement->value.expression;
+        ExpressionData *expressionData = expression->eval(expression, context);
+        valueType = copy_type(expressionData->type);
+        expressionData->free(expressionData);
         break;
     }
+    }
 
-    valueData->valueType = evalType;
+    valueData->value_type = valueType;
+    valueData->free = freeValueData;
     return valueData;
 }

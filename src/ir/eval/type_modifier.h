@@ -26,5 +26,6 @@ typedef LinkedList TypeModifierList;
 int compare_typeModifier(TypeModifier *modifier1, TypeModifier *modifier2);
 char *print_typeModifier(TypeModifier modifier);
 TypeModifierList *newTypeModifierList();
+TypeModifier *copy_typeModifier(TypeModifier *toCopy);
 
 #endif // TYPE_MODIFIER_H__

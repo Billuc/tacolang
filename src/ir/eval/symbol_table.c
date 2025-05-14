@@ -4,19 +4,19 @@
 
 // TODO : improve symbol table by using a hash table instead of a linked list
 
-static void freeSymbolData(SymbolData *data)
+static void free_SymbolData(SymbolData *data)
 {
     free(data->name);
-    free_evalType(data->type);
+    free_type(data->type);
     free(data);
 }
 
-SymbolTable *createSymbolTable()
+SymbolTable *create_SymbolTable()
 {
-    return newLinkedList(freeSymbolData);
+    return newLinkedList(free_SymbolData);
 }
 
-int compareSymbolData(void *a, void *b)
+int compare_SymbolData(void *a, void *b)
 {
     SymbolData *data1 = (SymbolData *)a;
     SymbolData *data2 = (SymbolData *)b;

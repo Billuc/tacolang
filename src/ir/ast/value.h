@@ -1,10 +1,9 @@
 #if !defined(VALUE_H__)
 #define VALUE_H__
 
-#include "expression.h"
-#include "common.h"
-#include "ir/eval/symbol_table.h"
-#include "../eval/type.h"
+#include "./expression.h"
+#include "ir/eval/context.h"
+#include "ir/eval/type.h"
 
 typedef enum
 {
@@ -18,26 +17,26 @@ typedef union
     int integer;
     float floating;
     ExpressionElement *expression;
-} ValueData;
+} Value;
 
-typedef struct
+typedef struct valueData
 {
-    EvalType *valueType;
-} EvalValueData;
+    Type *value_type;
+
+    void (*free)(struct valueData *);
+} ValueData;
 
 typedef struct valueElement
 {
     ValueType type;
-    ValueData value;
+    Value value;
 
-    FREE_FUNC(struct valueElement, free);
-    EVAL_FUNC(struct valueElement, EvalValueData *, eval);
+    void (*free)(struct valueElement *);
+    ValueData *(*eval)(struct valueElement *, EvalContext *);
 } ValueElement;
 
 ValueElement *newExpressionValue(ExpressionElement *value);
 ValueElement *newIntegerValue(int value);
 ValueElement *newFloatValue(float value);
-// void freeValue(ValueElement *valueEl);
-// EvalValueData *evalValue(ValueElement *valueElement, SymbolElement **symbolTable);
 
 #endif // VALUE_H__

@@ -79,7 +79,7 @@ typedef union
     StructType struct_type;
 } TypeData;
 
-typedef struct
+typedef struct type
 {
     TypeType type_type;
     TypeData type_data;
@@ -93,5 +93,6 @@ int compare_type(Type *type1, Type *type2);
 char *print_type(Type *type);
 void free_simpleType(SimpleType *simpleType);
 void free_type(Type *type);
+Type *copy_type(Type *toCopy);
 
 #endif // TYPE_H__

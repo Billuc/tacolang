@@ -5,7 +5,7 @@
 
 extern void yyerror(char *s);
 static void freeVariable(VariableElement *variableEl);
-static EvalVariableData *evalVariable(VariableElement *variableElement, SymbolElement **symbolTable);
+static VariableData *evalVariable(VariableElement *variableElement, EvalContext *context);
 
 VariableElement *newIdentifierVariable(char *identifier)
 {
@@ -15,9 +15,10 @@ VariableElement *newIdentifierVariable(char *identifier)
 
     variable->free = freeVariable;
     variable->eval = evalVariable;
-    variable->type = var_identifier;
-    variable->data.identifier = strdup(identifier);
-    if (!variable->data.identifier)
+    variable->element_type = var_identifier;
+    variable->element_data.identifier = strdup(identifier);
+
+    if (!variable->element_data.identifier)
     {
         free(variable);
         return NULL;
@@ -34,8 +35,8 @@ VariableElement *newDeclareVariable(DeclareElement *declare)
 
     variable->free = freeVariable;
     variable->eval = evalVariable;
-    variable->type = var_declare;
-    variable->data.declare = declare;
+    variable->element_type = var_declare;
+    variable->element_data.declare = declare;
 
     return variable;
 }
@@ -45,58 +46,71 @@ static void freeVariable(VariableElement *variableEl)
     if (!variableEl)
         return;
 
-    switch (variableEl->type)
+    switch (variableEl->element_type)
     {
     case var_identifier:
-        free(variableEl->data.identifier);
+        free(variableEl->element_data.identifier);
         break;
     case var_declare:
-        variableEl->data.declare->free(variableEl->data.declare);
+        variableEl->element_data.declare->free(variableEl->element_data.declare);
         break;
     }
 
     free(variableEl);
 }
 
-static EvalVariableData *evalVariable(VariableElement *variableElement, SymbolElement **symbolTable)
+static void freeVariableData(VariableData *variableData)
+{
+    if (!variableData)
+        return;
+
+    free_type(variableData->variable_type);
+    free(variableData);
+}
+
+static VariableData *evalVariable(VariableElement *variableElement, EvalContext *context)
 {
     if (!variableElement)
         return NULL;
 
-    EvalVariableData *evalData = (EvalVariableData *)malloc(sizeof(EvalVariableData));
-    if (!evalData)
+    VariableData *result = malloc(sizeof(VariableData));
+    if (!result)
         return NULL;
+    result->free = freeVariableData;
 
-    switch (variableElement->type)
+    switch (variableElement->element_type)
     {
     case var_identifier:
     {
-        SymbolData *symbol = getSymbol(*symbolTable, variableElement->data.identifier);
+        SymbolData *symbol = findSymbol(context, variableElement->element_data.identifier);
         if (!symbol)
         {
             char buf[100] = "";
-            snprintf(buf, 100, "Variable '%s' is not declared in this context", variableElement->data.identifier);
+            snprintf(buf, 100, "Variable '%s' is not declared in this context", variableElement->element_data.identifier);
             yyerror(buf);
-            free(evalData);
+            free(result);
             return NULL;
         }
-        evalData->variableType = symbol->type;
-        evalData->isDeclaration = false;
+        result->variable_type = copy_type(symbol->type);
+        result->is_declaration = false;
         break;
     }
     case var_declare:
     {
-        EvalDeclareData *declareData = variableElement->data.declare->eval(variableElement->data.declare, symbolTable);
+        DeclareElement *declare = variableElement->element_data.declare;
+        DeclareData *declareData = declare->eval(declare, context);
         if (!declareData)
         {
-            free(evalData);
+            free(result);
             return NULL;
         }
-        evalData->variableType = declareData->symbolType;
-        evalData->isDeclaration = true;
+        result->variable_type = copy_type(declareData->symbol_type);
+        result->is_declaration = true;
+
+        declareData->free(declareData);
         break;
     }
     }
 
-    return evalData;
+    return result;
 }

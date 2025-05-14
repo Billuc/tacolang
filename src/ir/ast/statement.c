@@ -2,13 +2,13 @@
 #include "statement.h"
 
 static void freeStatement(StatementElement *element);
-static void evalStatement(StatementElement *element, SymbolElement **symbolTable);
+static void evalStatement(StatementElement *element, EvalContext *context);
 
 StatementElement *newAssignmentStatement(AssignElement *assign)
 {
     StatementElement *element = malloc(sizeof(StatementElement));
-    StatementData data = {.assign = assign};
-    element->data = data;
+    Statement data = {.assign = assign};
+    element->statement = data;
     element->type = s_assignment;
     element->free = freeStatement;
     element->eval = evalStatement;
@@ -20,75 +20,24 @@ static void freeStatement(StatementElement *element)
     switch (element->type)
     {
     case s_assignment:
-        element->data.assign->free(element->data.assign);
+        element->statement.assign->free(element->statement.assign);
         break;
     }
 
     free(element);
 }
 
-static void evalStatement(StatementElement *element, SymbolElement **symbolTable)
+static void evalStatement(StatementElement *element, EvalContext *context)
 {
     switch (element->type)
     {
     case s_assignment:
-        element->data.assign->eval(element->data.assign, symbolTable);
+        element->statement.assign->eval(element->statement.assign, context);
         break;
     }
 }
 
-StatementLink *addStatement(StatementLink *list, StatementElement *newElement)
+StatementList *newStatementList()
 {
-    StatementLink *newHead = malloc(sizeof(StatementLink));
-    newHead->element = newElement;
-    newHead->next = list;
-    return newHead;
-}
-
-void freeStatementList(StatementLink *list)
-{
-    StatementLink *iter = list;
-
-    while (iter != NULL)
-    {
-        iter->element->free(iter->element);
-        StatementLink *next = iter->next;
-        free(iter);
-        iter = next;
-    }
-}
-
-void evalStatementList(StatementLink *list, SymbolElement **symbolTable)
-{
-    SymbolElement *table;
-    if (symbolTable == NULL)
-    {
-        table = createSymbolTable();
-        symbolTable = &table;
-    }
-
-    // Reverse the list
-    StatementLink *reversedList = NULL;
-    StatementLink *iter = list;
-    while (iter != NULL)
-    {
-        StatementLink *new = malloc(sizeof(StatementLink));
-        new->element = iter->element;
-        new->next = reversedList;
-        reversedList = new;
-        iter = iter->next;
-    }
-
-    // Iterate through the list and evaluate each statement
-    iter = reversedList;
-    while (iter != NULL)
-    {
-        iter->element->eval(iter->element, symbolTable);
-        StatementLink *next = iter->next;
-        free(iter); // Free the node and not its element as it is a shallow copy
-        iter = next;
-    }
-
-    // Free the resources
-    freeSymbolTable(*symbolTable);
+    return newLinkedList(freeStatement);
 }

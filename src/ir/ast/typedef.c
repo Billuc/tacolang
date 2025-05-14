@@ -5,7 +5,7 @@
 #include "utils/list_utils.h"
 
 static void freeTypedef(TypedefElement *element);
-static TypedefData *evalTypedef(TypedefElement *typedefElement, SymbolElement **symbolTable);
+static TypedefData *evalTypedef(TypedefElement *typedefElement, EvalContext *context);
 
 TypedefElement *newTypedef(ModifierList *modifiers, char *name)
 {
@@ -26,40 +26,48 @@ static void freeTypedef(TypedefElement *element)
 
 static void freeTypedefData(TypedefData *data)
 {
-    free_evalType(data->type);
+    free_type(data->type);
     free(data);
 }
 
-static TypedefData *evalTypedef(TypedefElement *typedefElement, SymbolElement **symbolTable)
+static TypedefData *evalTypedef(TypedefElement *typedefElement, EvalContext *context)
 {
-    TypedefData *evalData = malloc(sizeof(TypedefData));
-    evalData->free = freeTypedefData;
+    TypedefData *result = malloc(sizeof(TypedefData));
+    result->free = freeTypedefData;
 
-    EvalType *evalType = malloc(sizeof(EvalType));
-    evalType->type = t_variable;
-    evalType->data.variableTypeData.modifiers;
+    Type *defined_type = malloc(sizeof(Type));
+    defined_type->type_type = t_variable;
 
-    EvalModifierLinkData *modifiers = evalModifierList(typedefElement->modifiers, symbolTable);
-    evalType->type = t_variable;
-    evalType->data.variableTypeData.modifiers = modifiers->typeModifierList;
+    SimpleType *simpleType = &defined_type->type_data.variable_type;
+    simpleType->modifiers = newTypeModifierList();
+
+    LinkedListElement *current;
+    for (current = typedefElement->modifiers->head; current != NULL; current = current->next)
+    {
+        ModifierElement *modifier = (ModifierElement *)current->data;
+        ModifierData *m_data = modifier->eval(modifier, context);
+        TypeModifier *tm_copy = copy_typeModifier(m_data->typeModifier);
+        push(simpleType->modifiers, tm_copy);
+        m_data->free(m_data);
+    }
 
     int i;
     for (i = 0; i < BASE_TYPES_LEN; i++)
     {
         if (strcmp(BASE_TYPES[i].name, typedefElement->name) == 0)
         {
-            evalType->data.variableTypeData.is_base_type = true;
-            evalType->data.variableTypeData.type_data.baseType = BASE_TYPES[i].baseType;
+            simpleType->is_base_type = true;
+            simpleType->type_data.base_type = BASE_TYPES[i].baseType;
             break;
         }
     }
 
     if (i == BASE_TYPES_LEN)
     {
-        evalType->data.variableTypeData.is_base_type = false;
-        evalType->data.variableTypeData.type_data.customType = strdup(typedefElement->name);
+        simpleType->is_base_type = false;
+        simpleType->type_data.custom_type = strdup(typedefElement->name);
     }
 
-    evalData->type = evalType;
-    return evalData;
+    result->type = defined_type;
+    return result;
 }

@@ -9,7 +9,7 @@
 
 extern void yyerror(char *s);
 static void freeModifier(ModifierElement *element);
-static ModifierData *evalModifier(ModifierElement *element, SymbolElement **symbolTable);
+static ModifierData *evalModifier(ModifierElement *element, EvalContext *context);
 
 ModifierElement *newModifier(char *type)
 {
@@ -49,15 +49,16 @@ static void freeModifierData(ModifierData *data)
         return;
 
     if (data->typeModifier != NULL)
-        data->typeModifier->free(data->typeModifier);
+        free(data->typeModifier);
 
     free(data);
 }
 
-static ModifierData *evalModifier(ModifierElement *element, SymbolElement **symbolTable)
+static ModifierData *evalModifier(ModifierElement *element, EvalContext *context)
 {
     ModifierData *data = malloc(sizeof(ModifierData));
     data->free = freeModifierData;
+    data->typeModifier = malloc(sizeof(TypeModifier));
 
     switch (element->type)
     {
