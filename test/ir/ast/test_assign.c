@@ -21,14 +21,14 @@ void mock_freeValue(ValueElement *value)
 }
 
 static int calls_to_evalVariable = 0;
-EvalVariableData *mock_evalVariable(VariableElement *variable, SymbolElement **symbolTable)
+VariableData *mock_evalVariable(VariableElement *variable, EvalContext *context)
 {
     calls_to_evalVariable++;
     return NULL; // TODO
 }
 
 static int calls_to_evalValue = 0;
-EvalValueData *mock_evalValue(ValueElement *value, SymbolElement **symbolTable)
+ValueData *mock_evalValue(ValueElement *value, EvalContext *context)
 {
     calls_to_evalValue++;
     return NULL; // TODO
@@ -85,9 +85,9 @@ START_TEST(test_evalAssign)
     VariableElement *mockVar = mock_newVariable();
     ValueElement *mockVal = mock_newValue();
     AssignElement *assign = newAssign(mockVar, mockVal);
-    SymbolElement *mockSymbolTable = NULL;
+    EvalContext *mockContext = NULL;
 
-    assign->eval(assign, &mockSymbolTable);
+    assign->eval(assign, mockContext);
 
     assign->free(assign);
     ck_assert_int_eq(calls_to_freeVariable, 1);
@@ -100,10 +100,10 @@ START_TEST(test_evalAssign_typeCheck)
     VariableElement *mockVar = mock_newVariable();
     ValueElement *mockVal = mock_newValue();
     AssignElement *assign = newAssign(mockVar, mockVal);
-    SymbolElement *mockSymbolTable = NULL;
+    EvalContext *mockContext = NULL;
 
     // TODO
-    assign->eval(assign, &mockSymbolTable);
+    assign->eval(assign, mockContext);
 
     assign->free(assign);
     ck_assert_int_eq(calls_to_freeVariable, 1);

@@ -33,9 +33,9 @@ END_TEST
 START_TEST(test_evalExpression)
 {
     ExpressionElement *expression = newExpression("+");
-    SymbolElement *mockSymbolTable = NULL;
+    EvalContext *evalContext = newEvalContext();
 
-    EvalExpressionData *data = expression->eval(expression, &mockSymbolTable);
+    ExpressionData *data = expression->eval(expression, evalContext);
 
     // TODO : Check the data
 

@@ -19,8 +19,20 @@ int main(void)
     SRunner *sr = srunner_create(NULL);
 
     // Add all test suites
-    REGISTER_TEST_SUITE(test_statement);
+    // Utils
+    REGISTER_TEST_SUITE(test_list_utils);
+    REGISTER_TEST_SUITE(test_str_utils);
+    // EVAL
+    // AST
+    REGISTER_TEST_SUITE(test_assign);
+    REGISTER_TEST_SUITE(test_declare);
+    REGISTER_TEST_SUITE(test_expression);
     REGISTER_TEST_SUITE(test_modifier);
+    REGISTER_TEST_SUITE(test_program);
+    REGISTER_TEST_SUITE(test_statement);
+    REGISTER_TEST_SUITE(test_typedef);
+    REGISTER_TEST_SUITE(test_value);
+    REGISTER_TEST_SUITE(test_variable);
 
     srunner_run_all(sr, CK_NORMAL);
     number_failed = srunner_ntests_failed(sr);

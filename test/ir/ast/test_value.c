@@ -13,15 +13,15 @@ void mock_freeExpression(ExpressionElement *expression)
 }
 
 static int calls_to_evalExpression = 0;
-EvalExpressionData *mock_evalExpression(ExpressionElement *expression, SymbolElement **symbolTable)
+ExpressionData *mock_evalExpression(ExpressionElement *expression, EvalContext *context)
 {
-    EvalType *type = malloc(sizeof(EvalType));
-    type->type = t_variable;
-    type->data.variableTypeData.is_base_type = true;
-    type->data.variableTypeData.type_data.baseType = U32;
-    type->data.variableTypeData.modifiers = NULL;
+    Type *type = malloc(sizeof(Type));
+    type->type_type = t_variable;
+    type->type_data.variable_type.is_base_type = true;
+    type->type_data.variable_type.type_data.base_type = U32;
+    type->type_data.variable_type.modifiers = newTypeModifierList();
 
-    EvalExpressionData *evalData = malloc(sizeof(EvalExpressionData));
+    ExpressionData *evalData = malloc(sizeof(ExpressionData));
     evalData->type = type;
 
     calls_to_evalExpression++;
@@ -91,16 +91,16 @@ END_TEST
 START_TEST(test_evalIntegerValue)
 {
     ValueElement *value = newIntegerValue(42);
-    SymbolElement *mockSymbolTable = NULL;
+    EvalContext *context = newEvalContext();
 
-    EvalValueData *evalData = value->eval(value, &mockSymbolTable);
+    ValueData *evalData = value->eval(value, context);
 
     ck_assert_ptr_nonnull(evalData);
-    ck_assert_int_eq(evalData->valueType->type, t_variable);
-    ck_assert(evalData->valueType->data.variableTypeData.is_base_type);
-    ck_assert_int_eq(evalData->valueType->data.variableTypeData.type_data.baseType, U32);
+    ck_assert_int_eq(evalData->value_type->type_type, t_variable);
+    ck_assert(evalData->value_type->type_data.variable_type.is_base_type);
+    ck_assert_int_eq(evalData->value_type->type_data.variable_type.type_data.base_type, U32);
 
-    free(evalData);
+    evalData->free(evalData);
     value->free(value);
 }
 END_TEST
@@ -108,14 +108,14 @@ END_TEST
 START_TEST(test_evalFloatValue)
 {
     ValueElement *value = newFloatValue(3.14f);
-    SymbolElement *mockSymbolTable = NULL;
+    EvalContext *context = newEvalContext();
 
-    EvalValueData *evalData = value->eval(value, &mockSymbolTable);
+    ValueData *evalData = value->eval(value, context);
 
     ck_assert_ptr_nonnull(evalData);
-    ck_assert_int_eq(evalData->valueType->type, t_variable);
-    ck_assert(evalData->valueType->data.variableTypeData.is_base_type);
-    ck_assert_int_eq(evalData->valueType->data.variableTypeData.type_data.baseType, F32);
+    ck_assert_int_eq(evalData->value_type->type_type, t_variable);
+    ck_assert(evalData->value_type->type_data.variable_type.is_base_type);
+    ck_assert_int_eq(evalData->value_type->type_data.variable_type.type_data.base_type, F32);
 
     free(evalData);
     value->free(value);
@@ -126,16 +126,16 @@ START_TEST(test_evalExpressionValue)
 {
     ExpressionElement *mockExpression = mock_newExpression();
     ValueElement *value = newExpressionValue(mockExpression);
-    SymbolElement *mockSymbolTable = NULL;
+    EvalContext *context = newEvalContext();
 
-    EvalValueData *evalData = value->eval(value, &mockSymbolTable);
+    ValueData *evalData = value->eval(value, context);
 
     ck_assert_ptr_nonnull(evalData);
-    ck_assert_int_eq(evalData->valueType->type, t_variable);
-    ck_assert(evalData->valueType->data.variableTypeData.is_base_type);
-    ck_assert_int_eq(evalData->valueType->data.variableTypeData.type_data.baseType, U32);
+    ck_assert_int_eq(evalData->value_type->type_type, t_variable);
+    ck_assert(evalData->value_type->type_data.variable_type.is_base_type);
+    ck_assert_int_eq(evalData->value_type->type_data.variable_type.type_data.base_type, U32);
 
-    free(evalData);
+    evalData->free(evalData);
     value->free(value);
 }
 END_TEST
@@ -146,7 +146,7 @@ Suite *test_value_suite(void)
     TCase *tc_value;
 
     s = suite_create("Test value.c");
-    tc_value = tcase_create("Value");
+    tc_value = tcase_create("Core");
 
     tcase_add_checked_fixture(tc_value, setup, teardown);
     tcase_add_test(tc_value, test_newExpressionValue);

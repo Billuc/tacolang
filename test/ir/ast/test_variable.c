@@ -13,7 +13,7 @@ void mock_freeDeclare(DeclareElement *declare)
 }
 
 static int calls_to_evalDeclare = 0;
-EvalDeclareData *mock_evalDeclare(DeclareElement *declare, SymbolElement **symbolTable)
+DeclareData *mock_evalDeclare(DeclareElement *declare, EvalContext *context)
 {
     calls_to_evalDeclare++;
     return NULL; // TODO
@@ -46,7 +46,7 @@ START_TEST(test_newIdentifierVariable)
     VariableElement *variable = newIdentifierVariable("testVar");
 
     ck_assert_ptr_nonnull(variable);
-    ck_assert_str_eq(variable->data.identifier, "testVar");
+    ck_assert_str_eq(variable->element_data.identifier, "testVar");
 
     variable->free(variable);
     ck_assert_int_eq(calls_to_freeDeclare, 0); // No dependency on DeclareElement here
@@ -59,7 +59,7 @@ START_TEST(test_newDeclareVariable)
     VariableElement *variable = newDeclareVariable(mockDeclare);
 
     ck_assert_ptr_nonnull(variable);
-    ck_assert_ptr_eq(variable->data.declare, mockDeclare);
+    ck_assert_ptr_eq(variable->element_data.declare, mockDeclare);
 
     variable->free(variable);
     ck_assert_int_eq(calls_to_freeDeclare, 1);
@@ -70,9 +70,9 @@ START_TEST(test_evalVariable)
 {
     DeclareElement *mockDeclare = mock_newDeclare();
     VariableElement *variable = newDeclareVariable(mockDeclare);
-    SymbolElement *mockSymbolTable = NULL;
+    EvalContext *context = newEvalContext();
 
-    EvalVariableData *data = variable->eval(variable, &mockSymbolTable);
+    VariableData *data = variable->eval(variable, context);
     ck_assert_int_eq(calls_to_evalDeclare, 1);
 
     // TODO: Check the data
