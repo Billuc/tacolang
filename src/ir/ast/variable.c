@@ -27,20 +27,6 @@ VariableElement *newIdentifierVariable(char *identifier)
     return variable;
 }
 
-VariableElement *newDeclareVariable(DeclareElement *declare)
-{
-    VariableElement *variable = (VariableElement *)malloc(sizeof(VariableElement));
-    if (!variable)
-        return NULL;
-
-    variable->free = freeVariable;
-    variable->eval = evalVariable;
-    variable->element_type = var_declare;
-    variable->element_data.declare = declare;
-
-    return variable;
-}
-
 static void freeVariable(VariableElement *variableEl)
 {
     if (!variableEl)
@@ -50,9 +36,6 @@ static void freeVariable(VariableElement *variableEl)
     {
     case var_identifier:
         free(variableEl->element_data.identifier);
-        break;
-    case var_declare:
-        variableEl->element_data.declare->free(variableEl->element_data.declare);
         break;
     }
 
@@ -92,22 +75,6 @@ static VariableData *evalVariable(VariableElement *variableElement, EvalContext 
             return NULL;
         }
         result->variable_type = copy_type(symbol->type);
-        result->is_declaration = false;
-        break;
-    }
-    case var_declare:
-    {
-        DeclareElement *declare = variableElement->element_data.declare;
-        DeclareData *declareData = declare->eval(declare, context);
-        if (!declareData)
-        {
-            free(result);
-            return NULL;
-        }
-        result->variable_type = copy_type(declareData->symbol_type);
-        result->is_declaration = true;
-
-        declareData->free(declareData);
         break;
     }
     }

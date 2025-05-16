@@ -5,27 +5,7 @@
 
 /* ------------------------ MOCKS ------------------------ */
 
-static int calls_to_freeTypedef = 0;
-void mock_freeTypedef(TypedefElement *typedefEl)
-{
-    calls_to_freeTypedef++;
-    free(typedefEl);
-}
-
-static int calls_to_evalTypedef = 0;
-TypedefData *mock_evalTypedef(TypedefElement *typedefEl, EvalContext *context)
-{
-    calls_to_evalTypedef++;
-    return NULL; // TODO
-}
-
-TypedefElement *mock_newTypedef(void)
-{
-    TypedefElement *typedefEl = malloc(sizeof(TypedefElement));
-    typedefEl->free = mock_freeTypedef;
-    typedefEl->eval = mock_evalTypedef;
-    return typedefEl;
-}
+#include "./mocks/mock_typedef.h"
 
 /* ------------------------ FIXTURES ------------------------ */
 
@@ -63,6 +43,12 @@ START_TEST(test_evalDeclare)
 
     DeclareData *data = declare->eval(declare, context);
     ck_assert_int_eq(calls_to_evalTypedef, 1);
+    ck_assert_int_eq(context->symbolTableStack->size, 1);
+    SymbolTable *localTable = (SymbolTable *)(context->symbolTableStack->head->data);
+    ck_assert_int_eq(localTable->size, 1);
+    SymbolData *symbol = (SymbolData *)(localTable->head->data);
+    ck_assert_str_eq(symbol->name, "testVar");
+    ck_assert_int_eq(compare_type(symbol->type, mockType), 0);
 
     free(data);
     declare->free(declare);

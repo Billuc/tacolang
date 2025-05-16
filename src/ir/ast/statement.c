@@ -15,12 +15,26 @@ StatementElement *newAssignmentStatement(AssignElement *assign)
     return element;
 }
 
+StatementElement *newDeclareStatement(DeclareElement *declare)
+{
+    StatementElement *element = malloc(sizeof(StatementElement));
+    Statement data = {.declare = declare};
+    element->statement = data;
+    element->type = s_declaration;
+    element->free = freeStatement;
+    element->eval = evalStatement;
+    return element;
+}
+
 static void freeStatement(StatementElement *element)
 {
     switch (element->type)
     {
     case s_assignment:
         element->statement.assign->free(element->statement.assign);
+        break;
+    case s_declaration:
+        element->statement.declare->free(element->statement.declare);
         break;
     }
 
@@ -33,6 +47,9 @@ static void evalStatement(StatementElement *element, EvalContext *context)
     {
     case s_assignment:
         element->statement.assign->eval(element->statement.assign, context);
+        break;
+    case s_declaration:
+        element->statement.declare->eval(element->statement.declare, context);
         break;
     }
 }

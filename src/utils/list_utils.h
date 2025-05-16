@@ -20,6 +20,8 @@ LinkedList *newLinkedList(void (*freeData)(void *));
 void freeLinkedList(LinkedList *list);
 void push(LinkedList *list, void *data);
 void unshift(LinkedList *list, void *data);
+void *pop(LinkedList *list);
+void *shift(LinkedList *list);
 void *find(LinkedList *list, void *data, int (*compare)(void *, void *));
 int compare(LinkedList *list1, LinkedList *list2, int (*compare)(void *, void *));
 LinkedList *map(LinkedList *list, void *(*map)(void *), void (*freeData)(void *));

@@ -17,11 +17,12 @@ typedef struct declareElement
 {
     char *name;
     TypedefElement *type;
+    ValueElement *value;
 
     void (*free)(struct declareElement *);
     DeclareData *(*eval)(struct declareElement *, EvalContext *);
 } DeclareElement;
 
-DeclareElement *newDeclare(char *name, TypedefElement *type);
+DeclareElement *newDeclare(char *name, TypedefElement *type, ValueElement *value);
 
 #endif // DECLARE_H__

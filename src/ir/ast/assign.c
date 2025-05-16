@@ -29,11 +29,9 @@ static bool canAssign(VariableData *variable)
 {
     if (variable == NULL)
         return false;
-    if (variable->is_declaration)
-        return true;
 
     TypeModifierList *modifiers = variable->variable_type->type_data.variable_type.modifiers;
-    if (modifiers->size == 0)
+    if (modifiers == NULL || modifiers->size == 0)
         return false;
 
     TypeModifier *firstModifier = (TypeModifier *)modifiers->head->data;
@@ -47,6 +45,14 @@ static void evalAssign(AssignElement *assignElement, EvalContext *context)
 
     VariableElement *variable = assignElement->left;
     VariableData *variableData = variable->eval(variable, context);
+
+    if (variableData == NULL)
+    {
+        char buf[100] = "";
+        snprintf(buf, 100, "Couldn't evaluate variable correctly.");
+        yyerror(buf);
+        return;
+    }
 
     if (!canAssign(variableData))
     {

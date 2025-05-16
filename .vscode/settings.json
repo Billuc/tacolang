@@ -2,7 +2,8 @@
     "files.associations": {
         "*.h": "c",
         "typeinfo": "c",
-        "type_traits": "c"
+        "type_traits": "c",
+        "cstdlib": "c"
     },
     "editor.formatOnSave": true
 }

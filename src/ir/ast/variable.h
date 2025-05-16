@@ -9,19 +9,16 @@
 typedef enum
 {
     var_identifier,
-    var_declare,
 } VariableElementType;
 
 typedef union
 {
-    DeclareElement *declare;
     char *identifier;
 } VariableElementData;
 
 typedef struct variableData
 {
     Type *variable_type;
-    bool is_declaration;
 
     void (*free)(struct variableData *);
 } VariableData;
@@ -36,6 +33,5 @@ typedef struct variableElement
 } VariableElement;
 
 VariableElement *newIdentifierVariable(char *identifier);
-VariableElement *newDeclareVariable(DeclareElement *declare);
 
 #endif // VARIABLE_H__

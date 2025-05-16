@@ -9,11 +9,13 @@
 typedef enum
 {
     s_assignment,
+    s_declaration
 } StatementType;
 
 typedef union
 {
     AssignElement *assign;
+    DeclareElement *declare;
 } Statement;
 
 typedef struct statementElement
@@ -28,6 +30,7 @@ typedef struct statementElement
 typedef LinkedList StatementList;
 
 StatementElement *newAssignmentStatement(AssignElement *assign);
+StatementElement *newDeclareStatement(DeclareElement *declare);
 StatementList *newStatementList();
 
 #endif // STATEMENT_H__

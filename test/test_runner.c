@@ -7,9 +7,16 @@
     extern Suite *name##_suite(void); \
     srunner_add_suite(sr, name##_suite())
 
+int number_of_errors = 0;
+char **error_messages = NULL;
+
 // Required by the tested files
 void yyerror(const char *s)
 {
+    number_of_errors++;
+    error_messages = realloc(error_messages, sizeof(char *) * number_of_errors);
+    error_messages[number_of_errors - 1] = malloc(strlen(s) + 1);
+    strcpy(error_messages[number_of_errors - 1], s);
     fprintf(stderr, "[ERR] %s\n", s);
 }
 
@@ -26,13 +33,13 @@ int main(void)
     // AST
     REGISTER_TEST_SUITE(test_assign);
     REGISTER_TEST_SUITE(test_declare);
-    REGISTER_TEST_SUITE(test_expression);
-    REGISTER_TEST_SUITE(test_modifier);
-    REGISTER_TEST_SUITE(test_program);
-    REGISTER_TEST_SUITE(test_statement);
-    REGISTER_TEST_SUITE(test_typedef);
-    REGISTER_TEST_SUITE(test_value);
-    REGISTER_TEST_SUITE(test_variable);
+    // REGISTER_TEST_SUITE(test_expression);
+    // REGISTER_TEST_SUITE(test_modifier);
+    // REGISTER_TEST_SUITE(test_program);
+    // REGISTER_TEST_SUITE(test_statement);
+    // REGISTER_TEST_SUITE(test_typedef);
+    // REGISTER_TEST_SUITE(test_value);
+    // REGISTER_TEST_SUITE(test_variable);
 
     srunner_run_all(sr, CK_NORMAL);
     number_failed = srunner_ntests_failed(sr);

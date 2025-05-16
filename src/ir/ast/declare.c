@@ -8,20 +8,23 @@ extern void yyerror(char *s);
 static void freeDeclare(DeclareElement *element);
 static DeclareData *evalDeclare(DeclareElement *declareElement, EvalContext *context);
 
-DeclareElement *newDeclare(char *name, TypedefElement *type)
+DeclareElement *newDeclare(char *name, TypedefElement *type, ValueElement *value)
 {
     DeclareElement *element = malloc(sizeof(DeclareElement));
     element->name = strdup(name);
     element->type = type;
+    element->value = value;
     element->free = freeDeclare;
     element->eval = evalDeclare;
     return element;
 }
 
-void freeDeclare(DeclareElement *element)
+static void freeDeclare(DeclareElement *element)
 {
     free(element->name);
-    element->type->free(element->type);
+    if (element->type != NULL)
+        element->type->free(element->type);
+    element->value->free(element->value);
     free(element);
 }
 
@@ -32,7 +35,7 @@ static void freeDeclareData(DeclareData *data)
     free(data);
 }
 
-DeclareData *evalDeclare(DeclareElement *declareElement, EvalContext *context)
+static DeclareData *evalDeclare(DeclareElement *declareElement, EvalContext *context)
 {
     char *variableName = declareElement->name;
     SymbolData *symbol = findSymbol(context, variableName);
@@ -45,19 +48,42 @@ DeclareData *evalDeclare(DeclareElement *declareElement, EvalContext *context)
         return NULL;
     }
 
-    TypedefData *typedefData = declareElement->type->eval(declareElement->type, context);
+    ValueData *valueData = declareElement->value->eval(declareElement->value, context);
 
     SymbolData *newSymbol = malloc(sizeof(SymbolData));
     newSymbol->name = strdup(declareElement->name);
-    newSymbol->type = copy_type(typedefData->type);
+
+    if (declareElement->type != NULL)
+    {
+        TypedefData *typedefData = declareElement->type->eval(declareElement->type, context);
+        newSymbol->type = copy_type(typedefData->type);
+        typedefData->free(typedefData);
+    }
+    else
+    {
+        newSymbol->type = copy_type(valueData->value_type);
+    }
+
     putSymbol(context, newSymbol);
 
     DeclareData *data = malloc(sizeof(DeclareData));
     data->free = freeDeclareData;
     data->symbol_name = strdup(variableName);
-    data->symbol_type = copy_type(typedefData->type);
+    data->symbol_type = copy_type(newSymbol->type);
 
-    typedefData->free(typedefData);
+    if (!compare_type(valueData->value_type, newSymbol->type))
+    {
+        char buf[200] = "";
+        char *value_type_str = print_type(valueData->value_type);
+        char *symbol_type_str = print_type(newSymbol->type);
 
+        snprintf(buf, 200, "Couldn't assign value of type '%s' to variable of type '%s'", value_type_str, symbol_type_str);
+        yyerror(buf);
+
+        free(value_type_str);
+        free(symbol_type_str);
+    }
+
+    valueData->free(valueData);
     return data;
 }

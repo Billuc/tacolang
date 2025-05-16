@@ -82,6 +82,54 @@ void unshift(LinkedList *list, void *data)
     list->size++;
 }
 
+void *pop(LinkedList *list)
+{
+    if (list->tail == NULL)
+        return NULL;
+
+    LinkedListElement *lastElement = list->tail;
+    void *data = lastElement->data;
+
+    if (lastElement->prev != NULL)
+    {
+        list->tail = lastElement->prev;
+        list->tail->next = NULL;
+    }
+    else
+    {
+        list->head = NULL;
+        list->tail = NULL;
+    }
+
+    free(lastElement);
+    list->size--;
+    return data;
+}
+
+void *shift(LinkedList *list)
+{
+    if (list->head == NULL)
+        return NULL;
+
+    LinkedListElement *firstElement = list->head;
+    void *data = firstElement->data;
+
+    if (firstElement->next != NULL)
+    {
+        list->head = firstElement->next;
+        list->head->prev = NULL;
+    }
+    else
+    {
+        list->head = NULL;
+        list->tail = NULL;
+    }
+
+    free(firstElement);
+    list->size--;
+    return data;
+}
+
 static int ptr_compare(void *a, void *b)
 {
     return a - b;

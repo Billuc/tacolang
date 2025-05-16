@@ -26,7 +26,8 @@ static void evalProgram(ProgramElement *element, EvalContext *context)
     for (current = element->statements->head; current != NULL; current = current->next)
     {
         StatementElement *statement = (StatementElement *)current->data;
-        statement->eval(statement, context);
+        if (statement != NULL)
+            statement->eval(statement, context);
     }
 }
 
