@@ -2,6 +2,7 @@
 #include "ir/ast/declare.h"
 #include <stdlib.h>
 #include "utils/str_utils.h"
+#include "ir/eval/type.h"
 
 extern void yyerror(char *s);
 
@@ -68,7 +69,7 @@ static FunctionDefinitionData *evalFunctionDefinition(FunctionDefinitionElement 
             functionData->free(functionData);
             return NULL;
         }
-        functionType->argument_types[functionType->number_of_args - 1] = parameterData->type->type_data.variable_type;
+        copy_simpleType(&parameterData->type->type_data.variable_type, &functionType->argument_types[functionType->number_of_args - 1]);
 
         SymbolData *symbol = malloc(sizeof(SymbolData));
         symbol->name = strdup(parameter->name);

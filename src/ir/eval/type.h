@@ -95,5 +95,6 @@ char *print_simpleType(SimpleType type);
 void free_simpleType(SimpleType *simpleType);
 void free_type(Type *type);
 Type *copy_type(Type *toCopy);
+void copy_simpleType(SimpleType *toCopy, SimpleType *copied);
 
 #endif // TYPE_H__

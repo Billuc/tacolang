@@ -47,12 +47,14 @@ void yyerror(const char* s);
     ValueElement *value;
     VariableElement *variable;
     int integer;
+    float floating;
     char* string;
 }
 
 %token LET ENDSTMT FN FN_RETURN
 %token <string> IDENTIFIER TYPEDEF MODIFIER
 %token <integer> INTEGER
+%token <floating> FLOAT
 
 %type <parameters> func_params
 %type <parameter> func_param
@@ -112,6 +114,7 @@ assignment: variable '=' value { $$ = newAssign($1, $3); }
 variable: IDENTIFIER { $$ = newIdentifierVariable($1); }
 
 value: INTEGER { $$ = newIntegerValue($1); }
+    | FLOAT { $$ = newFloatValue($1); }
     | expression { $$ = newExpressionValue($1); }
     | funccall { $$ = newFunctionCallValue($1); }
 
