@@ -13,6 +13,11 @@ static const SimpleType floatTypeData = {
     .type_data = {.base_type = F32},
     .modifiers = NULL,
 };
+static const SimpleType boolTypeData = {
+    .is_base_type = true,
+    .type_data = {.base_type = Boolean},
+    .modifiers = NULL,
+};
 
 ValueElement *newExpressionValue(ExpressionElement *value)
 {
@@ -39,6 +44,16 @@ ValueElement *newFloatValue(float value)
     ValueElement *element = malloc(sizeof(ValueElement));
     element->type = v_floating;
     element->value.floating = value;
+    element->free = freeValue;
+    element->eval = evalValue;
+    return element;
+}
+
+ValueElement *newBooleanValue(bool value)
+{
+    ValueElement *element = malloc(sizeof(ValueElement));
+    element->type = v_boolean;
+    element->value.boolean = value;
     element->free = freeValue;
     element->eval = evalValue;
     return element;
@@ -93,6 +108,15 @@ static ValueData *evalValue(ValueElement *valueElement, EvalContext *context)
         TypeData float_td = {.variable_type = floatTypeData};
         float_td.variable_type.modifiers = newTypeModifierList(); // We get segfault if we don't do this
         valueType->type_data = float_td;
+        break;
+    }
+    case v_boolean:
+    {
+        valueType = malloc(sizeof(Type));
+        valueType->type_type = t_variable;
+        TypeData bool_td = {.variable_type = boolTypeData};
+        bool_td.variable_type.modifiers = newTypeModifierList(); // We get segfault if we don't do this
+        valueType->type_data = bool_td;
         break;
     }
     case v_expression:

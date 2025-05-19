@@ -3,5 +3,5 @@ fn add(i1: mut.U32, i2: U32) -> U32 {
 }
 
 fn main(argc: U32, argv: ref.ref.U8) -> I32 {
-    add(3.14, 4)
+    add(1, 4)
 }

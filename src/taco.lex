@@ -27,6 +27,8 @@ opt         { yylval.string = strdup(yytext); return MODIFIER; }
 0b{BIN_DIGIT}+  { yylval.integer = strtol(strremove(yytext, 'b'), NULL, 2); return INTEGER; }
 ({DIGIT}){1,3}((_)?{DIGIT}{3})*    { yylval.integer = atoi(strremove(yytext, '_')); return INTEGER; }
 ({DIGIT}){1,3}((_)?{DIGIT}{3})*\.{DIGIT}*  { yylval.floating = atof(strremove(yytext, '_')); return FLOAT; }
+true        { yylval.boolean = 1; return BOOLEAN; }
+false       { yylval.boolean = 0; return BOOLEAN; }
 {VARNAME}   { yylval.string = strdup(yytext); return IDENTIFIER; }
 {TYPE}      { yylval.string = strdup(yytext); return TYPEDEF; }
 \n          { return ENDSTMT; }

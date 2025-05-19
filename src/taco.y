@@ -49,12 +49,14 @@ void yyerror(const char* s);
     int integer;
     float floating;
     char* string;
+    bool boolean;
 }
 
 %token LET ENDSTMT FN FN_RETURN
 %token <string> IDENTIFIER TYPEDEF MODIFIER
 %token <integer> INTEGER
 %token <floating> FLOAT
+%token <boolean> BOOLEAN
 
 %type <parameters> func_params
 %type <parameter> func_param
@@ -115,6 +117,7 @@ variable: IDENTIFIER { $$ = newIdentifierVariable($1); }
 
 value: INTEGER { $$ = newIntegerValue($1); }
     | FLOAT { $$ = newFloatValue($1); }
+    | BOOLEAN { $$ = newBooleanValue($1); }
     | expression { $$ = newExpressionValue($1); }
     | funccall { $$ = newFunctionCallValue($1); }
 
