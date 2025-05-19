@@ -1,5 +1,4 @@
-%option noyywrap
-%option yylineno
+%option noyywrap noinput nounput yylineno
 %{
 #include <string.h>
 #include <stdlib.h>
@@ -29,6 +28,15 @@ opt         { yylval.string = strdup(yytext); return MODIFIER; }
 ({DIGIT}){1,3}((_)?{DIGIT}{3})*\.{DIGIT}*  { yylval.floating = atof(strremove(yytext, '_')); return FLOAT; }
 true        { yylval.boolean = 1; return BOOLEAN; }
 false       { yylval.boolean = 0; return BOOLEAN; }
+'.{1}'          { yylval.character = yytext[1]; return CHARACTER; }
+'\n'            { yylval.character = '\n'; return CHARACTER; }
+'\r'            { yylval.character = '\r'; return CHARACTER; }
+'\t'            { yylval.character = '\t'; return CHARACTER; }
+'\\'            { yylval.character = '\\'; return CHARACTER; }
+'\''            { yylval.character = '\''; return CHARACTER; }
+'\"'            { yylval.character = '\"'; return CHARACTER; }
+'\0'            { yylval.character = '\0'; return CHARACTER; }
+'\x{DIGIT}{2}'  { yylval.character = (char)strtol(&yytext[3], NULL, 16); return CHARACTER; }
 {VARNAME}   { yylval.string = strdup(yytext); return IDENTIFIER; }
 {TYPE}      { yylval.string = strdup(yytext); return TYPEDEF; }
 \n          { return ENDSTMT; }

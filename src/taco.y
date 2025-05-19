@@ -50,6 +50,7 @@ void yyerror(const char* s);
     float floating;
     char* string;
     bool boolean;
+    char character;
 }
 
 %token LET ENDSTMT FN FN_RETURN
@@ -57,6 +58,7 @@ void yyerror(const char* s);
 %token <integer> INTEGER
 %token <floating> FLOAT
 %token <boolean> BOOLEAN
+%token <character> CHARACTER
 
 %type <parameters> func_params
 %type <parameter> func_param
@@ -118,6 +120,7 @@ variable: IDENTIFIER { $$ = newIdentifierVariable($1); }
 value: INTEGER { $$ = newIntegerValue($1); }
     | FLOAT { $$ = newFloatValue($1); }
     | BOOLEAN { $$ = newBooleanValue($1); }
+    | CHARACTER { $$ = newCharacterValue($1); }
     | expression { $$ = newExpressionValue($1); }
     | funccall { $$ = newFunctionCallValue($1); }
 

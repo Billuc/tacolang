@@ -12,6 +12,7 @@ typedef enum
     v_integer,
     v_floating,
     v_boolean,
+    v_character,
     v_expression,
     v_funccall,
 } ValueType;
@@ -21,6 +22,7 @@ typedef union
     int integer;
     float floating;
     bool boolean;
+    char character;
     ExpressionElement *expression;
     FunctionCallElement *function_call;
 } Value;
@@ -45,6 +47,7 @@ ValueElement *newExpressionValue(ExpressionElement *value);
 ValueElement *newIntegerValue(int value);
 ValueElement *newFloatValue(float value);
 ValueElement *newBooleanValue(bool value);
+ValueElement *newCharacterValue(char value);
 ValueElement *newFunctionCallValue(FunctionCallElement *value);
 
 // freeValue isn't static because it is used for the argument list in funccall.c
