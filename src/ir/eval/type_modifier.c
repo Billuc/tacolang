@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <string.h>
 #include "type_modifier.h"
 #include "utils/str_utils.h"
