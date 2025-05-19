@@ -4,12 +4,14 @@
 #include "./expression.h"
 #include "ir/eval/context.h"
 #include "ir/eval/type.h"
+#include "ir/ast/funccall.h"
 
 typedef enum
 {
     v_integer,
     v_floating,
     v_expression,
+    v_funccall,
 } ValueType;
 
 typedef union
@@ -17,6 +19,7 @@ typedef union
     int integer;
     float floating;
     ExpressionElement *expression;
+    FunctionCallElement *function_call;
 } Value;
 
 typedef struct valueData
@@ -38,5 +41,9 @@ typedef struct valueElement
 ValueElement *newExpressionValue(ExpressionElement *value);
 ValueElement *newIntegerValue(int value);
 ValueElement *newFloatValue(float value);
+ValueElement *newFunctionCallValue(FunctionCallElement *value);
+
+// freeValue isn't static because it is used for the argument list in funccall.c
+void freeValue(ValueElement *value);
 
 #endif // VALUE_H__

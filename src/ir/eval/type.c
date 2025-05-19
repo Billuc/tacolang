@@ -127,7 +127,7 @@ static char *print_baseType(BaseType baseType)
     }
 }
 
-static char *print_simpleType(SimpleType type)
+char *print_simpleType(SimpleType type)
 {
     char buf[50] = "";
 

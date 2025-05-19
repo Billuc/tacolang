@@ -1,7 +1,7 @@
-fn add(i1: mut.I32, i2: I32) -> I32 {
+fn add(i1: mut.U32, i2: U32) -> U32 {
     i1 = 4
 }
 
-fn main(argc: I32, argv: ref.ref.U8) -> I32 {
+fn main(argc: U32, argv: ref.ref.U8) -> I32 {
     add(2, 4)
 }

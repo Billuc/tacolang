@@ -26,6 +26,17 @@ StatementElement *newDeclareStatement(DeclareElement *declare)
     return element;
 }
 
+StatementElement *newValueStatement(ValueElement *value)
+{
+    StatementElement *element = malloc(sizeof(StatementElement));
+    Statement data = {.value = value};
+    element->statement = data;
+    element->type = s_value;
+    element->free = freeStatement;
+    element->eval = evalStatement;
+    return element;
+}
+
 static void freeStatement(StatementElement *element)
 {
     switch (element->type)
@@ -35,6 +46,9 @@ static void freeStatement(StatementElement *element)
         break;
     case s_declaration:
         element->statement.declare->free(element->statement.declare);
+        break;
+    case s_value:
+        element->statement.value->free(element->statement.value);
         break;
     }
 
@@ -50,6 +64,9 @@ static void evalStatement(StatementElement *element, EvalContext *context)
         break;
     case s_declaration:
         element->statement.declare->eval(element->statement.declare, context);
+        break;
+    case s_value:
+        element->statement.value->eval(element->statement.value, context);
         break;
     }
 }

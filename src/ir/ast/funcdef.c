@@ -86,5 +86,10 @@ static FunctionDefinitionData *evalFunctionDefinition(FunctionDefinitionElement 
     SymbolTable *table = shift(context->symbolTableStack);
     freeLinkedList(table);
 
+    SymbolData *fnSymbol = malloc(sizeof(SymbolData));
+    fnSymbol->name = strdup(functionDefinition->name);
+    fnSymbol->type = copy_type(functionData->functionType);
+    putSymbol(context, fnSymbol);
+
     return functionData;
 }

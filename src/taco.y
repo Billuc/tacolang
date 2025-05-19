@@ -15,6 +15,7 @@ void yyerror(const char* s);
 #include "ir/ast/declare.h"
 #include "ir/ast/definition.h"
 #include "ir/ast/expression.h"
+#include "ir/ast/funccall.h"
 #include "ir/ast/funcparam.h"
 #include "ir/ast/funcdef.h"
 #include "ir/ast/modifier.h"
@@ -32,6 +33,8 @@ void yyerror(const char* s);
     DefinitionElement *definition;
     DefinitionList *definitionList;
     ExpressionElement *expression;
+    FunctionCallElement *functionCall;
+    FunctionArgumentList *arguments;
     FunctionDefinitionElement *functionDef;
     FunctionParameterList *parameters;
     FunctionParameterElement *parameter;
@@ -59,6 +62,8 @@ void yyerror(const char* s);
 %type <definition> definition
 %type <definitionList> definitions
 %type <expression> expression
+%type <functionCall> funccall
+%type <arguments> func_args
 %type <functionDef> funcdef
 %type <modifierList> modifiers
 %type <modifier> modifier
@@ -87,6 +92,7 @@ statements: /* empty */ { $$ = newStatementList(); }
 statement: /* empty */ { $$ = NULL; }
     | assignment    { $$ = newAssignmentStatement($1); }
     | declaration    { $$ = newDeclareStatement($1); }
+    | value      { $$ = newValueStatement($1); }
 
 funcdef: FN IDENTIFIER '(' func_params ')' FN_RETURN typedef block { $$ = newFunctionDefinition($2, $4, $7, $8); }
     | FN IDENTIFIER '(' ')' FN_RETURN typedef block { $$ = newFunctionDefinition($2, NULL, $6, $7); }

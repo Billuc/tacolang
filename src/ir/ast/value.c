@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include "value.h"
 
-static void freeValue(ValueElement *valueEl);
 static ValueData *evalValue(ValueElement *valueElement, EvalContext *context);
 
 static const SimpleType intTypeData = {
@@ -45,10 +44,22 @@ ValueElement *newFloatValue(float value)
     return element;
 }
 
-static void freeValue(ValueElement *valueEl)
+ValueElement *newFunctionCallValue(FunctionCallElement *value)
+{
+    ValueElement *element = malloc(sizeof(ValueElement));
+    element->type = v_funccall;
+    element->value.function_call = value;
+    element->free = freeValue;
+    element->eval = evalValue;
+    return element;
+}
+
+void freeValue(ValueElement *valueEl)
 {
     if (valueEl->type == v_expression)
         valueEl->value.expression->free(valueEl->value.expression);
+    else if (valueEl->type == v_funccall)
+        valueEl->value.function_call->free(valueEl->value.function_call);
 
     free(valueEl);
 }
@@ -71,6 +82,7 @@ static ValueData *evalValue(ValueElement *valueElement, EvalContext *context)
         valueType = malloc(sizeof(Type));
         valueType->type_type = t_variable;
         TypeData int_td = {.variable_type = intTypeData};
+        int_td.variable_type.modifiers = newTypeModifierList(); // We get segfault if we don't do this
         valueType->type_data = int_td;
         break;
     }
@@ -79,6 +91,7 @@ static ValueData *evalValue(ValueElement *valueElement, EvalContext *context)
         valueType = malloc(sizeof(Type));
         valueType->type_type = t_variable;
         TypeData float_td = {.variable_type = floatTypeData};
+        float_td.variable_type.modifiers = newTypeModifierList(); // We get segfault if we don't do this
         valueType->type_data = float_td;
         break;
     }
@@ -88,6 +101,21 @@ static ValueData *evalValue(ValueElement *valueElement, EvalContext *context)
         ExpressionData *expressionData = expression->eval(expression, context);
         valueType = copy_type(expressionData->type);
         expressionData->free(expressionData);
+        break;
+    }
+    case v_funccall:
+    {
+        FunctionCallElement *functionCall = valueElement->value.function_call;
+        FunctionCall *functionCallData = functionCall->eval(functionCall, context);
+
+        if (functionCallData == NULL)
+        {
+            free(valueData);
+            return NULL;
+        }
+
+        valueType = copy_type(functionCallData->returnType);
+        functionCallData->free(functionCallData);
         break;
     }
     }

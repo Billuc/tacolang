@@ -91,6 +91,7 @@ int compare_structType(StructType struct1, StructType struct2);
 int compare_type(Type *type1, Type *type2);
 
 char *print_type(Type *type);
+char *print_simpleType(SimpleType type);
 void free_simpleType(SimpleType *simpleType);
 void free_type(Type *type);
 Type *copy_type(Type *toCopy);
