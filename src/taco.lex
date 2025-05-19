@@ -18,7 +18,7 @@ fn          { return FN; }
 mut         { yylval.string = strdup(yytext); return MODIFIER; }
 ref         { yylval.string = strdup(yytext); return MODIFIER; }
 opt         { yylval.string = strdup(yytext); return MODIFIER; }
-{DIGIT}+    { yylval.integer = atoi(yytext); return INTEGER; }
+({DIGIT}){1,2}(_{DIGIT}{3})*    { yylval.integer = atoi(strremove(yytext, '_')); return INTEGER; }
 {VARNAME}   { yylval.string = strdup(yytext); return IDENTIFIER; }
 {TYPE}      { yylval.string = strdup(yytext); return TYPEDEF; }
 \n          { return ENDSTMT; }

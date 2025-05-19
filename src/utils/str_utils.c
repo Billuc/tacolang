@@ -24,3 +24,19 @@ char *strndup(const char *s, size_t len)
     p[size - 1] = '\0';
     return p;
 }
+
+char *strremove(char *s, const char remove)
+{
+    char *p = s;
+    char *q = s;
+    while (*p)
+    {
+        if (*p != remove)
+        {
+            *q++ = *p;
+        }
+        p++;
+    }
+    *q = '\0';
+    return s;
+}
