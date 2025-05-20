@@ -5,6 +5,7 @@
 #include "./declare.h"
 #include "ir/eval/type.h"
 #include "ir/eval/context.h"
+#include "utils/error_utils.h"
 
 typedef enum
 {
@@ -27,11 +28,12 @@ typedef struct variableElement
 {
     VariableElementType element_type;
     VariableElementData element_data;
+    location_t location;
 
     void (*free)(struct variableElement *);
     VariableData *(*eval)(struct variableElement *, EvalContext *);
 } VariableElement;
 
-VariableElement *newIdentifierVariable(char *identifier);
+VariableElement *newIdentifierVariable(char *identifier, location_t location);
 
 #endif // VARIABLE_H__

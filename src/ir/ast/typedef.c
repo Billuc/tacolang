@@ -7,10 +7,11 @@
 static void freeTypedef(TypedefElement *element);
 static TypedefData *evalTypedef(TypedefElement *typedefElement, EvalContext *context);
 
-TypedefElement *newTypedef(ModifierList *modifiers, char *name)
+TypedefElement *newTypedef(ModifierList *modifiers, char *name, location_t location)
 {
     TypedefElement *element = malloc(sizeof(TypedefElement));
     element->modifiers = modifiers;
+    element->location = location;
     element->name = strdup(name);
     element->free = freeTypedef;
     element->eval = evalTypedef;

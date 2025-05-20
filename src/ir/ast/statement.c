@@ -4,34 +4,37 @@
 static void freeStatement(StatementElement *element);
 static void evalStatement(StatementElement *element, EvalContext *context);
 
-StatementElement *newAssignmentStatement(AssignElement *assign)
+StatementElement *newAssignmentStatement(AssignElement *assign, location_t location)
 {
     StatementElement *element = malloc(sizeof(StatementElement));
     Statement data = {.assign = assign};
     element->statement = data;
     element->type = s_assignment;
+    element->location = location;
     element->free = freeStatement;
     element->eval = evalStatement;
     return element;
 }
 
-StatementElement *newDeclareStatement(DeclareElement *declare)
+StatementElement *newDeclareStatement(DeclareElement *declare, location_t location)
 {
     StatementElement *element = malloc(sizeof(StatementElement));
     Statement data = {.declare = declare};
     element->statement = data;
     element->type = s_declaration;
+    element->location = location;
     element->free = freeStatement;
     element->eval = evalStatement;
     return element;
 }
 
-StatementElement *newValueStatement(ValueElement *value)
+StatementElement *newValueStatement(ValueElement *value, location_t location)
 {
     StatementElement *element = malloc(sizeof(StatementElement));
     Statement data = {.value = value};
     element->statement = data;
     element->type = s_value;
+    element->location = location;
     element->free = freeStatement;
     element->eval = evalStatement;
     return element;

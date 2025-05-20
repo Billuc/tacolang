@@ -18,11 +18,12 @@ typedef struct declareElement
     char *name;
     TypedefElement *type;
     ValueElement *value;
+    location_t location;
 
     void (*free)(struct declareElement *);
     DeclareData *(*eval)(struct declareElement *, EvalContext *);
 } DeclareElement;
 
-DeclareElement *newDeclare(char *name, TypedefElement *type, ValueElement *value);
+DeclareElement *newDeclare(char *name, TypedefElement *type, ValueElement *value, location_t location);
 
 #endif // DECLARE_H__

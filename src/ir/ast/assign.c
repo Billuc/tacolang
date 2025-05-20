@@ -4,15 +4,16 @@
 #include <stdbool.h>
 #include "assign.h"
 
-extern void yyerror(char *s);
+extern void yyerror(const char *s);
 static void freeAssign(AssignElement *assignElement);
 static void evalAssign(AssignElement *assignElement, EvalContext *context);
 
-AssignElement *newAssign(VariableElement *left, ValueElement *right)
+AssignElement *newAssign(VariableElement *left, ValueElement *right, location_t loc)
 {
     AssignElement *element = malloc(sizeof(AssignElement));
     element->left = left;
     element->right = right;
+    element->location = loc;
     element->free = freeAssign;
     element->eval = evalAssign;
     return element;
@@ -48,17 +49,13 @@ static void evalAssign(AssignElement *assignElement, EvalContext *context)
 
     if (variableData == NULL)
     {
-        char buf[100] = "";
-        snprintf(buf, 100, "Couldn't evaluate variable correctly.");
-        yyerror(buf);
+        print_error(assignElement->location, "Couldn't evaluate variable correctly.");
         return;
     }
 
     if (!canAssign(variableData))
     {
-        char buf[100] = "";
-        snprintf(buf, 100, "You are trying to assign a value to a non mutable variable.");
-        yyerror(buf);
+        print_error(assignElement->location, "You are trying to assign a value to a non mutable variable.");
         variableData->free(variableData);
         return;
     }
@@ -67,21 +64,17 @@ static void evalAssign(AssignElement *assignElement, EvalContext *context)
     ValueData *valueData = value->eval(value, context);
     if (valueData == NULL)
     {
-        char buf[100] = "";
-        snprintf(buf, 100, "Incorrect value.");
-        yyerror(buf);
+        print_error(assignElement->location, "Couldn't evaluate value correctly.");
         variableData->free(variableData);
         return;
     }
 
     if (!compare_type(valueData->value_type, variableData->variable_type))
     {
-        char buf[200] = "";
         char *value_type_str = print_type(valueData->value_type);
         char *symbol_type_str = print_type(variableData->variable_type);
 
-        snprintf(buf, 200, "Couldn't assign value of type '%s' to variable of type '%s'", value_type_str, symbol_type_str);
-        yyerror(buf);
+        print_error(assignElement->location, "Couldn't assign value of type '%s' to variable of type '%s'", value_type_str, symbol_type_str);
 
         free(value_type_str);
         free(symbol_type_str);

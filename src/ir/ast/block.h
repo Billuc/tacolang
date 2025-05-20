@@ -7,11 +7,12 @@
 typedef struct blockElement
 {
     StatementList *statements;
+    location_t location;
 
     void (*free)(struct blockElement *);
     void (*eval)(struct blockElement *, EvalContext *);
 } BlockElement;
 
-BlockElement *newBlock(StatementList *statements);
+BlockElement *newBlock(StatementList *statements, location_t loc);
 
 #endif // BLOCK_H__

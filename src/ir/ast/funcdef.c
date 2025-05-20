@@ -4,12 +4,12 @@
 #include "utils/str_utils.h"
 #include "ir/eval/type.h"
 
-extern void yyerror(char *s);
+extern void yyerror(const char *s);
 
 static void freeFunctionDefinition(FunctionDefinitionElement *functionDefinition);
 static FunctionDefinitionData *evalFunctionDefinition(FunctionDefinitionElement *functionDefinition, EvalContext *context);
 
-FunctionDefinitionElement *newFunctionDefinition(char *name, FunctionParameterList *parameters, TypedefElement *return_type, BlockElement *block)
+FunctionDefinitionElement *newFunctionDefinition(char *name, FunctionParameterList *parameters, TypedefElement *return_type, BlockElement *block, location_t location)
 {
     FunctionDefinitionElement *element = malloc(sizeof(FunctionDefinitionElement));
     element->name = name;
@@ -20,6 +20,7 @@ FunctionDefinitionElement *newFunctionDefinition(char *name, FunctionParameterLi
     element->parameters = parameters;
     element->return_type = return_type;
     element->block = block;
+    element->location = location;
     element->free = freeFunctionDefinition;
     element->eval = evalFunctionDefinition;
     return element;
@@ -65,7 +66,7 @@ static FunctionDefinitionData *evalFunctionDefinition(FunctionDefinitionElement 
         functionType->number_of_args++;
         if (functionType->number_of_args > MAX_NB_OF_ARGS)
         {
-            yyerror("Too many parameters in function definition.");
+            print_error(functionDefinition->location, "Function '%s' has too many parameters", functionDefinition->name);
             functionData->free(functionData);
             return NULL;
         }

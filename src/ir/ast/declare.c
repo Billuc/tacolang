@@ -4,16 +4,17 @@
 #include "declare.h"
 #include "utils/str_utils.h"
 
-extern void yyerror(char *s);
+extern void yyerror(const char *s);
 static void freeDeclare(DeclareElement *element);
 static DeclareData *evalDeclare(DeclareElement *declareElement, EvalContext *context);
 
-DeclareElement *newDeclare(char *name, TypedefElement *type, ValueElement *value)
+DeclareElement *newDeclare(char *name, TypedefElement *type, ValueElement *value, location_t location)
 {
     DeclareElement *element = malloc(sizeof(DeclareElement));
     element->name = strdup(name);
     element->type = type;
     element->value = value;
+    element->location = location;
     element->free = freeDeclare;
     element->eval = evalDeclare;
     return element;
@@ -42,9 +43,7 @@ static DeclareData *evalDeclare(DeclareElement *declareElement, EvalContext *con
 
     if (symbol != NULL)
     {
-        char buf[100] = "";
-        snprintf(buf, 100, "Variable '%s' has already been declared in this context", variableName);
-        yyerror(buf);
+        print_error(declareElement->location, "Variable '%s' has already been declared in this context", variableName);
         return NULL;
     }
 
@@ -73,12 +72,10 @@ static DeclareData *evalDeclare(DeclareElement *declareElement, EvalContext *con
 
     if (!compare_type(valueData->value_type, newSymbol->type))
     {
-        char buf[200] = "";
         char *value_type_str = print_type(valueData->value_type);
         char *symbol_type_str = print_type(newSymbol->type);
 
-        snprintf(buf, 200, "Couldn't assign value of type '%s' to variable of type '%s'", value_type_str, symbol_type_str);
-        yyerror(buf);
+        print_error(declareElement->location, "Couldn't assign value of type '%s' to variable of type '%s'", value_type_str, symbol_type_str);
 
         free(value_type_str);
         free(symbol_type_str);

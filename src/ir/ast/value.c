@@ -24,61 +24,67 @@ static const SimpleType charTypeData = {
     .modifiers = NULL,
 };
 
-ValueElement *newExpressionValue(ExpressionElement *value)
+ValueElement *newExpressionValue(ExpressionElement *value, location_t location)
 {
     ValueElement *element = malloc(sizeof(ValueElement));
     element->type = v_expression;
     element->value.expression = value;
+    element->location = location;
     element->free = freeValue;
     element->eval = evalValue;
     return element;
 }
 
-ValueElement *newIntegerValue(int value)
+ValueElement *newIntegerValue(int value, location_t location)
 {
     ValueElement *element = malloc(sizeof(ValueElement));
     element->type = v_integer;
     element->value.integer = value;
+    element->location = location;
     element->free = freeValue;
     element->eval = evalValue;
     return element;
 }
 
-ValueElement *newFloatValue(float value)
+ValueElement *newFloatValue(float value, location_t location)
 {
     ValueElement *element = malloc(sizeof(ValueElement));
     element->type = v_floating;
     element->value.floating = value;
+    element->location = location;
     element->free = freeValue;
     element->eval = evalValue;
     return element;
 }
 
-ValueElement *newBooleanValue(bool value)
+ValueElement *newBooleanValue(bool value, location_t location)
 {
     ValueElement *element = malloc(sizeof(ValueElement));
     element->type = v_boolean;
     element->value.boolean = value;
+    element->location = location;
     element->free = freeValue;
     element->eval = evalValue;
     return element;
 }
 
-ValueElement *newCharacterValue(char value)
+ValueElement *newCharacterValue(char value, location_t location)
 {
     ValueElement *element = malloc(sizeof(ValueElement));
     element->type = v_character;
     element->value.character = value;
+    element->location = location;
     element->free = freeValue;
     element->eval = evalValue;
     return element;
 }
 
-ValueElement *newFunctionCallValue(FunctionCallElement *value)
+ValueElement *newFunctionCallValue(FunctionCallElement *value, location_t location)
 {
     ValueElement *element = malloc(sizeof(ValueElement));
     element->type = v_funccall;
     element->value.function_call = value;
+    element->location = location;
     element->free = freeValue;
     element->eval = evalValue;
     return element;

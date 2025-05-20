@@ -4,10 +4,10 @@
 extern int yylex(void);
 extern int yyparse(void);
 extern int yywrap() { return 1; }
-
-void yyerror(const char* s);
 %}
+
 %define parse.error verbose
+%locations
 
 %code requires {
 #include "ir/ast/assign.h"
@@ -24,7 +24,10 @@ void yyerror(const char* s);
 #include "ir/ast/typedef.h"
 #include "ir/ast/value.h"
 #include "ir/ast/variable.h"
+#include "utils/error_utils.h"
+#include "utils/str_utils.h"
 }
+%define api.location.type {location_t}
 
 %union {
     AssignElement *assign;
@@ -83,77 +86,78 @@ void yyerror(const char* s);
 %start program
 
 %%
-program: definitions { $$ = newProgram($1); eval($$); }
+program: definitions { $$ = newProgram($1, @$); eval($$); }
 
 definitions: /* empty */ { $$ = newDefinitionList(); }
     | definitions definition ENDSTMT { push($1, $2); $$ = $1; }
 
 definition: /* empty */ { $$ = NULL; }
-    | funcdef { $$ = newFuncdefDefinition($1); }
+    | funcdef { $$ = newFuncdefDefinition($1, @$); }
     /* | declaration { $$ = newDeclare($1); } */ // Consts ?
 
 statements: /* empty */ { $$ = newStatementList(); }
     | statements statement ENDSTMT { push($1, $2); $$ = $1; }
 
 statement: /* empty */ { $$ = NULL; }
-    | assignment    { $$ = newAssignmentStatement($1); }
-    | declaration    { $$ = newDeclareStatement($1); }
-    | value      { $$ = newValueStatement($1); }
+    | assignment    { $$ = newAssignmentStatement($1, @$); }
+    | declaration    { $$ = newDeclareStatement($1, @$); }
+    | value      { $$ = newValueStatement($1, @$); }
 
-funcdef: FN IDENTIFIER '(' func_params ')' FN_RETURN typedef block { $$ = newFunctionDefinition($2, $4, $7, $8); }
-    | FN IDENTIFIER '(' ')' FN_RETURN typedef block { $$ = newFunctionDefinition($2, NULL, $6, $7); }
+funcdef: FN IDENTIFIER '(' func_params ')' FN_RETURN typedef block { $$ = newFunctionDefinition($2, $4, $7, $8, @$); }
+    | FN IDENTIFIER '(' ')' FN_RETURN typedef block { $$ = newFunctionDefinition($2, NULL, $6, $7, @$); }
 
 func_params: func_param { $$ = newFunctionParameterList(); push($$, $1); }
     | func_params ',' func_param { push($1, $3); $$ = $1; }
 
-func_param: IDENTIFIER ':' typedef { $$ = newFunctionParameter($1, $3); }
+func_param: IDENTIFIER ':' typedef { $$ = newFunctionParameter($1, $3, @$); }
 
-block: '{' statements '}' { $$ = newBlock($2); }
+block: '{' statements '}' { $$ = newBlock($2, @$); }
 
-declaration: LET IDENTIFIER ':' typedef '=' value { $$ = newDeclare($2, $4, $6); }
-    | LET IDENTIFIER ':' '=' value { $$ = newDeclare($2, NULL, $5); }
+declaration: LET IDENTIFIER ':' typedef '=' value { $$ = newDeclare($2, $4, $6, @$); }
+    | LET IDENTIFIER ':' '=' value { $$ = newDeclare($2, NULL, $5, @$); }
 
-assignment: variable '=' value { $$ = newAssign($1, $3); }
+assignment: variable '=' value { $$ = newAssign($1, $3, @$); }
 
-variable: IDENTIFIER { $$ = newIdentifierVariable($1); }
+variable: IDENTIFIER { $$ = newIdentifierVariable($1, @$); }
 
-value: INTEGER { $$ = newIntegerValue($1); }
-    | FLOAT { $$ = newFloatValue($1); }
-    | BOOLEAN { $$ = newBooleanValue($1); }
-    | CHARACTER { $$ = newCharacterValue($1); }
-    | expression { $$ = newExpressionValue($1); }
-    | funccall { $$ = newFunctionCallValue($1); }
+value: INTEGER { $$ = newIntegerValue($1, @$); }
+    | FLOAT { $$ = newFloatValue($1, @$); }
+    | BOOLEAN { $$ = newBooleanValue($1, @$); }
+    | CHARACTER { $$ = newCharacterValue($1, @$); }
+    | expression { $$ = newExpressionValue($1, @$); }
+    | funccall { $$ = newFunctionCallValue($1, @$); }
 
-funccall: IDENTIFIER '(' func_args ')' { $$ = newFunctionCall($1, $3); }
-    | IDENTIFIER '(' ')' { $$ = newFunctionCall($1, NULL); }
+funccall: IDENTIFIER '(' func_args ')' { $$ = newFunctionCall($1, $3, @$); }
+    | IDENTIFIER '(' ')' { $$ = newFunctionCall($1, NULL, @$); }
 
 func_args: value { $$ = newFunctionArgumentList(); push($$, $1); }
     | func_args ',' value { push($1, $3); $$ = $1; }
 
-expression: '.' { $$ = newExpression("."); } 
+expression: '.' { $$ = newExpression(".", @$); } 
 /* INTEGER { $$ = newInteger($1); } */
 
-typedef: modifiers TYPEDEF { $$ = newTypedef($1, $2); }
+typedef: modifiers TYPEDEF { $$ = newTypedef($1, $2, @$); }
 
 modifiers: /* empty */ { $$ = newModifierList(); }
     | modifiers modifier '.' { push($1, $2); $$ = $1; }
 
-modifier: MODIFIER { $$ = newModifier($1); }
+modifier: MODIFIER { $$ = newModifier($1, @$); }
 
 %%
 
 int main(int argc, char* argv[]) {
     extern FILE* yyin;
+    extern YYLTYPE yylloc;
 
     ++argv; --argc;
 
     yyin = fopen(argv[0], "r");
+    yylloc.first_line = 1;
+    yylloc.first_column = 1;
+    yylloc.last_line = 1;
+    yylloc.last_column = 1;
+    yylloc.filename = strdup(argv[0]);
     yyparse();
 
     return 1;
-}
-
-void yyerror(const char* s) {
-    extern int yylineno;
-    fprintf(stderr, "[ERR] %s - line %d\n", s, yylineno);
 }

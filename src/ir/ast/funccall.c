@@ -5,14 +5,14 @@
 #include <string.h>
 #include <stdio.h>
 
-extern void yyerror(char *s);
 static void freeFunctionCallElement(FunctionCallElement *functionCall);
 static FunctionCall *evalFunctionCallElement(FunctionCallElement *functionCall, EvalContext *context);
 
-FunctionCallElement *newFunctionCall(char *functionName, FunctionArgumentList *arguments)
+FunctionCallElement *newFunctionCall(char *functionName, FunctionArgumentList *arguments, location_t loc)
 {
     FunctionCallElement *element = malloc(sizeof(FunctionCallElement));
     element->functionName = strdup(functionName);
+    element->location = loc;
     if (arguments == NULL)
     {
         arguments = newFunctionArgumentList();
@@ -51,9 +51,7 @@ static FunctionCall *evalFunctionCallElement(FunctionCallElement *functionCall, 
     SymbolData *funcdef = findSymbol(context, functionCall->functionName);
     if (funcdef == NULL)
     {
-        char buf[500];
-        sprintf(buf, "Function '%s' not defined in this context", functionCall->functionName);
-        yyerror(buf);
+        print_error(functionCall->location, "Function '%s' not defined in this context", functionCall->functionName);
         free(call);
         return NULL;
     }
@@ -61,10 +59,7 @@ static FunctionCall *evalFunctionCallElement(FunctionCallElement *functionCall, 
     // check if the function is a function type
     if (funcdef->type->type_type != t_function)
     {
-        char buf[500];
-        sprintf(buf, "Symbol '%s' is not a function", functionCall->functionName);
-        yyerror(buf);
-        free(call);
+        print_error(functionCall->location, "Symbol '%s' is not a function", functionCall->functionName);
         return NULL;
     }
 
@@ -72,9 +67,7 @@ static FunctionCall *evalFunctionCallElement(FunctionCallElement *functionCall, 
     FunctionType *functionType = &funcdef->type->type_data.function_type;
     if (functionType->number_of_args != functionCall->arguments->size)
     {
-        char buf[500];
-        sprintf(buf, "Function '%s' takes %d arguments, but %d were given", functionCall->functionName, functionType->number_of_args, functionCall->arguments->size);
-        yyerror(buf);
+        print_error(functionCall->location, "Function '%s' takes %d arguments, but %d were given", functionCall->functionName, functionType->number_of_args, functionCall->arguments->size);
         free(call);
         return NULL;
     }
@@ -87,9 +80,7 @@ static FunctionCall *evalFunctionCallElement(FunctionCallElement *functionCall, 
 
         if (argValue->value_type->type_type != t_variable)
         {
-            char buf[500];
-            sprintf(buf, "Argument %d of function '%s' is not a variable type", i + 1, functionCall->functionName);
-            yyerror(buf);
+            print_error(functionCall->location, "Argument %d of function '%s' is not a variable type", i + 1, functionCall->functionName);
             free(call);
             return NULL;
         }
@@ -99,9 +90,7 @@ static FunctionCall *evalFunctionCallElement(FunctionCallElement *functionCall, 
 
         if (compare_simpleType(argType, paramType) != 0)
         {
-            char buf[500];
-            sprintf(buf, "Argument %d of function '%s' has type '%s', but parameter %d has type '%s'", i + 1, functionCall->functionName, print_simpleType(argType), i + 1, print_simpleType(paramType));
-            yyerror(buf);
+            print_error(argument->location, "Argument %d of function '%s' has type '%s', but parameter %d has type '%s'", i + 1, functionCall->functionName, print_simpleType(argType), i + 1, print_simpleType(paramType));
             free(call);
             return NULL;
         }

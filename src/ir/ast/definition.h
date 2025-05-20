@@ -4,6 +4,7 @@
 #include "./funcdef.h"
 #include "ir/eval/context.h"
 #include "utils/list_utils.h"
+#include "utils/error_utils.h"
 
 typedef enum
 {
@@ -19,6 +20,7 @@ typedef struct definitionElement
 {
     DefinitionType type;
     Definition definition;
+    location_t location;
 
     void (*free)(struct definitionElement *);
     void (*eval)(struct definitionElement *, EvalContext *);
@@ -26,7 +28,7 @@ typedef struct definitionElement
 
 typedef LinkedList DefinitionList;
 
-DefinitionElement *newFuncdefDefinition(FunctionDefinitionElement *funcdef);
+DefinitionElement *newFuncdefDefinition(FunctionDefinitionElement *funcdef, location_t location);
 DefinitionList *newDefinitionList();
 
 #endif // DEFINITION_H__
