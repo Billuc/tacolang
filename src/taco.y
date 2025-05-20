@@ -57,7 +57,7 @@ extern int yywrap() { return 1; }
 }
 
 %token LET ENDSTMT FN FN_RETURN
-%token <string> IDENTIFIER TYPEDEF MODIFIER
+%token <string> IDENTIFIER TYPEDEF MODIFIER STRING MULTILINE_STRING
 %token <integer> INTEGER
 %token <floating> FLOAT
 %token <boolean> BOOLEAN
@@ -76,6 +76,7 @@ extern int yywrap() { return 1; }
 %type <functionDef> funcdef
 %type <modifierList> modifiers
 %type <modifier> modifier
+%type <string> multiline_string
 %type <program> program
 %type <statement> statement
 %type <statementList> statements
@@ -124,8 +125,13 @@ value: INTEGER { $$ = newIntegerValue($1, @$); }
     | FLOAT { $$ = newFloatValue($1, @$); }
     | BOOLEAN { $$ = newBooleanValue($1, @$); }
     | CHARACTER { $$ = newCharacterValue($1, @$); }
+    | STRING { $$ = newStringValue($1, @$); }
+    | multiline_string { $$ = newStringValue($1, @$); }
     | expression { $$ = newExpressionValue($1, @$); }
     | funccall { $$ = newFunctionCallValue($1, @$); }
+
+multiline_string: MULTILINE_STRING { $$ = strdup($1); }
+    | multiline_string MULTILINE_STRING { $$ = strconcat($1, $2); }
 
 funccall: IDENTIFIER '(' func_args ')' { $$ = newFunctionCall($1, $3, @$); }
     | IDENTIFIER '(' ')' { $$ = newFunctionCall($1, NULL, @$); }

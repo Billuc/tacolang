@@ -45,6 +45,8 @@ false       { yylval.boolean = 0; return BOOLEAN; }
 '\\\"'            { yylval.character = '\"'; return CHARACTER; }
 '\\0'            { yylval.character = '\0'; return CHARACTER; }
 '\\x{DIGIT}{2}'  { yylval.character = (char)strtol(&yytext[3], NULL, 16); return CHARACTER; }
+\"[^\"]*\"      { yylval.string = strdup(strremove(yytext, '"')); return STRING; }
+\\\\[^\n]*\n  { yylloc.last_column = 1; yylval.string = strdup(&yytext[2]); return MULTILINE_STRING; }
 {VARNAME}   { yylval.string = strdup(yytext); return IDENTIFIER; }
 {TYPE}      { yylval.string = strdup(yytext); return TYPEDEF; }
 \n          { yylloc.last_column = 1; return ENDSTMT; }

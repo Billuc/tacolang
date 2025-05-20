@@ -1,5 +1,7 @@
 #include <stdlib.h>
+#include <string.h>
 #include "value.h"
+#include "utils/str_utils.h"
 
 static ValueData *evalValue(ValueElement *valueElement, EvalContext *context);
 
@@ -79,6 +81,17 @@ ValueElement *newCharacterValue(char value, location_t location)
     return element;
 }
 
+ValueElement *newStringValue(char *value, location_t location)
+{
+    ValueElement *element = malloc(sizeof(ValueElement));
+    element->type = v_string;
+    element->value.string = strdup(value);
+    element->location = location;
+    element->free = freeValue;
+    element->eval = evalValue;
+    return element;
+}
+
 ValueElement *newFunctionCallValue(FunctionCallElement *value, location_t location)
 {
     ValueElement *element = malloc(sizeof(ValueElement));
@@ -96,6 +109,8 @@ void freeValue(ValueElement *valueEl)
         valueEl->value.expression->free(valueEl->value.expression);
     else if (valueEl->type == v_funccall)
         valueEl->value.function_call->free(valueEl->value.function_call);
+    else if (valueEl->type == v_string)
+        free(valueEl->value.string);
 
     free(valueEl);
 }
@@ -147,6 +162,19 @@ static ValueData *evalValue(ValueElement *valueElement, EvalContext *context)
         TypeData char_td = {.variable_type = charTypeData};
         char_td.variable_type.modifiers = newTypeModifierList(); // We get segfault if we don't do this
         valueType->type_data = char_td;
+        break;
+    }
+    case v_string:
+    {
+        valueType = malloc(sizeof(Type));
+        valueType->type_type = t_variable;
+        TypeData string_td = {.variable_type = charTypeData};
+        string_td.variable_type.modifiers = newTypeModifierList();
+        TypeModifier *string_td_modifier = malloc(sizeof(TypeModifier));
+        string_td_modifier->modifier_type = tm_array;
+        string_td_modifier->modifier_data.array_size = strlen(valueElement->value.string) + 1;
+        push(string_td.variable_type.modifiers, string_td_modifier);
+        valueType->type_data = string_td;
         break;
     }
     case v_expression:

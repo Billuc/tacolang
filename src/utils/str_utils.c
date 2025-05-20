@@ -40,3 +40,17 @@ char *strremove(char *s, const char remove)
     *q = '\0';
     return s;
 }
+
+char *strconcat(char *s1, char *s2)
+{
+    size_t len1 = strlen(s1);
+    size_t len2 = strlen(s2);
+    char *result = malloc(len1 + len2 + 1);
+    if (result)
+    {
+        memcpy(result, s1, len1);
+        memcpy(result + len1, s2, len2);
+        result[len1 + len2] = '\0';
+    }
+    return result;
+}

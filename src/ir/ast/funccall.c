@@ -90,7 +90,11 @@ static FunctionCall *evalFunctionCallElement(FunctionCallElement *functionCall, 
 
         if (compare_simpleType(argType, paramType) != 0)
         {
-            print_error(argument->location, "Argument %d of function '%s' has type '%s', but parameter %d has type '%s'", i + 1, functionCall->functionName, print_simpleType(argType), i + 1, print_simpleType(paramType));
+            char *argTypeStr = print_simpleType(argType);
+            char *paramTypeStr = print_simpleType(paramType);
+            print_error(argument->location, "Argument %d of function '%s' has type '%s', but parameter has type '%s'", i + 1, functionCall->functionName, argTypeStr, paramTypeStr);
+            free(argTypeStr);
+            free(paramTypeStr);
             free(call);
             return NULL;
         }

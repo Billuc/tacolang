@@ -8,11 +8,13 @@ typedef enum
     tm_mutable,
     tm_reference,
     tm_optional,
+    tm_array,
+    tm_list,
 } TypeModifierType;
 
 typedef union
 {
-
+    int array_size;
 } TypeModifierData;
 
 typedef struct typeModifier
