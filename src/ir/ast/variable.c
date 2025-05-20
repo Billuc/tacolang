@@ -3,11 +3,11 @@
 #include <string.h>
 #include <stdio.h>
 
-extern void yyerror(char *s);
+extern void yyerror(const char *s);
 static void freeVariable(VariableElement *variableEl);
 static VariableData *evalVariable(VariableElement *variableElement, EvalContext *context);
 
-VariableElement *newIdentifierVariable(char *identifier)
+VariableElement *newIdentifierVariable(char *identifier, location_t location)
 {
     VariableElement *variable = (VariableElement *)malloc(sizeof(VariableElement));
     if (!variable)
@@ -17,6 +17,7 @@ VariableElement *newIdentifierVariable(char *identifier)
     variable->eval = evalVariable;
     variable->element_type = var_identifier;
     variable->element_data.identifier = strdup(identifier);
+    variable->location = location;
 
     if (!variable->element_data.identifier)
     {
@@ -68,9 +69,7 @@ static VariableData *evalVariable(VariableElement *variableElement, EvalContext 
         SymbolData *symbol = findSymbol(context, variableElement->element_data.identifier);
         if (!symbol)
         {
-            char buf[100] = "";
-            snprintf(buf, 100, "Variable '%s' is not declared in this context", variableElement->element_data.identifier);
-            yyerror(buf);
+            print_error(variableElement->location, "Variable '%s' is not declared in this context", variableElement->element_data.identifier);
             free(result);
             return NULL;
         }

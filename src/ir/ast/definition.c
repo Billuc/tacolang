@@ -4,11 +4,12 @@
 static void freeDefinition(DefinitionElement *def);
 static void evalDefinition(DefinitionElement *def, EvalContext *ctx);
 
-DefinitionElement *newFuncdefDefinition(FunctionDefinitionElement *funcdef)
+DefinitionElement *newFuncdefDefinition(FunctionDefinitionElement *funcdef, location_t location)
 {
     DefinitionElement *def = malloc(sizeof(DefinitionElement));
     def->type = def_funcdef;
     def->definition.funcdef = funcdef;
+    def->location = location;
     def->free = freeDefinition;
     def->eval = evalDefinition;
     return def;

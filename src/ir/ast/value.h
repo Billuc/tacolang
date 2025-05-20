@@ -6,6 +6,7 @@
 #include "ir/eval/context.h"
 #include "ir/eval/type.h"
 #include "ir/ast/funccall.h"
+#include "utils/error_utils.h"
 
 typedef enum
 {
@@ -38,17 +39,18 @@ typedef struct valueElement
 {
     ValueType type;
     Value value;
+    location_t location;
 
     void (*free)(struct valueElement *);
     ValueData *(*eval)(struct valueElement *, EvalContext *);
 } ValueElement;
 
-ValueElement *newExpressionValue(ExpressionElement *value);
-ValueElement *newIntegerValue(int value);
-ValueElement *newFloatValue(float value);
-ValueElement *newBooleanValue(bool value);
-ValueElement *newCharacterValue(char value);
-ValueElement *newFunctionCallValue(FunctionCallElement *value);
+ValueElement *newExpressionValue(ExpressionElement *value, location_t location);
+ValueElement *newIntegerValue(int value, location_t location);
+ValueElement *newFloatValue(float value, location_t location);
+ValueElement *newBooleanValue(bool value, location_t location);
+ValueElement *newCharacterValue(char value, location_t location);
+ValueElement *newFunctionCallValue(FunctionCallElement *value, location_t location);
 
 // freeValue isn't static because it is used for the argument list in funccall.c
 void freeValue(ValueElement *value);

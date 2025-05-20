@@ -6,6 +6,7 @@
 #include "./value.h"
 #include "ir/eval/context.h"
 #include "utils/list_utils.h"
+#include "utils/error_utils.h"
 
 typedef enum
 {
@@ -25,6 +26,7 @@ typedef struct statementElement
 {
     StatementType type;
     Statement statement;
+    location_t location;
 
     void (*free)(struct statementElement *);
     void (*eval)(struct statementElement *, EvalContext *);
@@ -32,9 +34,9 @@ typedef struct statementElement
 
 typedef LinkedList StatementList;
 
-StatementElement *newAssignmentStatement(AssignElement *assign);
-StatementElement *newDeclareStatement(DeclareElement *declare);
-StatementElement *newValueStatement(ValueElement *value);
+StatementElement *newAssignmentStatement(AssignElement *assign, location_t location);
+StatementElement *newDeclareStatement(DeclareElement *declare, location_t location);
+StatementElement *newValueStatement(ValueElement *value, location_t location);
 StatementList *newStatementList();
 
 #endif // STATEMENT_H__

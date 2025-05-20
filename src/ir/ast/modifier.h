@@ -4,6 +4,7 @@
 #include "utils/list_utils.h"
 #include "ir/eval/type_modifier.h"
 #include "ir/eval/context.h"
+#include "utils/error_utils.h"
 
 typedef enum
 {
@@ -22,6 +23,7 @@ typedef struct modifierData
 typedef struct modifierElement
 {
     Modifier type;
+    location_t location;
 
     void (*free)(struct modifierElement *);
     ModifierData *(*eval)(struct modifierElement *, EvalContext *);
@@ -29,7 +31,7 @@ typedef struct modifierElement
 
 typedef LinkedList ModifierList;
 
-ModifierElement *newModifier(char *type);
+ModifierElement *newModifier(char *type, location_t location);
 ModifierList *newModifierList();
 
 #endif // MODIFIER_H__

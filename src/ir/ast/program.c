@@ -4,10 +4,11 @@
 static void freeProgram(ProgramElement *element);
 static void evalProgram(ProgramElement *element, EvalContext *context);
 
-ProgramElement *newProgram(StatementList *statements)
+ProgramElement *newProgram(StatementList *statements, location_t location)
 {
     ProgramElement *element = malloc(sizeof(ProgramElement));
     element->statements = statements;
+    element->location = location;
     element->free = freeProgram;
     element->eval = evalProgram;
     return element;

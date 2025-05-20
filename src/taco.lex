@@ -4,6 +4,14 @@
 #include <stdlib.h>
 #include "taco.tab.h"
 #include "utils/str_utils.h"
+
+#define YY_USER_ACTION \
+    { \
+        yylloc.first_line = yylloc.last_line; \
+        yylloc.first_column = yylloc.last_column; \
+        yylloc.last_line = yylineno; \
+        yylloc.last_column = yylloc.first_column + yyleng; \
+    }
 %}
 
 DIGIT [0-9]
@@ -39,6 +47,6 @@ false       { yylval.boolean = 0; return BOOLEAN; }
 '\\x{DIGIT}{2}'  { yylval.character = (char)strtol(&yytext[3], NULL, 16); return CHARACTER; }
 {VARNAME}   { yylval.string = strdup(yytext); return IDENTIFIER; }
 {TYPE}      { yylval.string = strdup(yytext); return TYPEDEF; }
-\n          { return ENDSTMT; }
+\n          { yylloc.last_column = 1; return ENDSTMT; }
 .           { return yytext[0]; }
 %%

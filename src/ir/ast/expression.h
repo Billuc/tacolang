@@ -3,6 +3,7 @@
 
 #include "ir/eval/context.h"
 #include "ir/eval/type.h"
+#include "utils/error_utils.h"
 
 typedef struct expressionData
 {
@@ -14,11 +15,12 @@ typedef struct expressionData
 typedef struct expressionElement
 {
     char *operation;
+    location_t location;
 
     void (*free)(struct expressionElement *);
     ExpressionData *(*eval)(struct expressionElement *, EvalContext *);
 } ExpressionElement;
 
-ExpressionElement *newExpression(char *operation);
+ExpressionElement *newExpression(char *operation, location_t location);
 
 #endif // EXPRESSION_H__

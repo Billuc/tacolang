@@ -7,15 +7,15 @@
 #define M_REFERENCE "ref"
 #define M_OPTIONAL "opt"
 
-extern void yyerror(char *s);
 static void freeModifier(ModifierElement *element);
 static ModifierData *evalModifier(ModifierElement *element, EvalContext *context);
 
-ModifierElement *newModifier(char *type)
+ModifierElement *newModifier(char *type, location_t location)
 {
     ModifierElement *element = malloc(sizeof(ModifierElement));
     element->free = freeModifier;
     element->eval = evalModifier;
+    element->location = location;
 
     if (!strcmp(type, M_MUTABLE))
         element->type = m_mutable;
@@ -25,9 +25,7 @@ ModifierElement *newModifier(char *type)
         element->type = m_optional;
     else
     {
-        char buf[100];
-        sprintf(buf, "Unknown modifier: %s", type);
-        yyerror(buf);
+        print_error(location, "Unknown modifier: %s", type);
         free(element);
         return NULL;
     }

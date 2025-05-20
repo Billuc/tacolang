@@ -1,14 +1,15 @@
 #include "block.h"
 #include <stdlib.h>
 
-extern void yyerror(char *s);
+extern void yyerror(const char *s);
 static void freeBlock(BlockElement *blockElement);
 static void evalBlock(BlockElement *blockElement, EvalContext *context);
 
-BlockElement *newBlock(StatementList *statements)
+BlockElement *newBlock(StatementList *statements, location_t loc)
 {
     BlockElement *element = malloc(sizeof(BlockElement));
     element->statements = statements;
+    element->location = loc;
     element->free = freeBlock;
     element->eval = evalBlock;
     return element;

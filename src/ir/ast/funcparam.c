@@ -5,11 +5,12 @@
 static void freeFunctionParameter(FunctionParameterElement *functionParameter);
 static FunctionParameterData *evalFunctionParameter(FunctionParameterElement *functionParameter, EvalContext *context);
 
-FunctionParameterElement *newFunctionParameter(char *name, TypedefElement *type)
+FunctionParameterElement *newFunctionParameter(char *name, TypedefElement *type, location_t location)
 {
     FunctionParameterElement *element = malloc(sizeof(FunctionParameterElement));
     element->name = strdup(name);
     element->type = type;
+    element->location = location;
     element->free = freeFunctionParameter;
     element->eval = evalFunctionParameter;
     return element;

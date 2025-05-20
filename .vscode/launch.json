@@ -26,7 +26,8 @@
             "args": [
                 "./test/test.taco"
             ],
-            "preLaunchTask": "make"
+            "preLaunchTask": "make",
+            "stopAtEntry": true,
         },
         {
             "name": "(gdb) Tests: Launch",

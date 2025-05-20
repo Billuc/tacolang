@@ -13,10 +13,11 @@ static const SimpleType intTypeData = {
     .modifiers = NULL,
 };
 
-ExpressionElement *newExpression(char *operation)
+ExpressionElement *newExpression(char *operation, location_t location)
 {
     ExpressionElement *element = malloc(sizeof(ExpressionElement));
     element->operation = strdup(operation);
+    element->location = location;
     element->free = freeExpression;
     element->eval = evalExpression;
     return element;
