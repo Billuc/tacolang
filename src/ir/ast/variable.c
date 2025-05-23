@@ -1,82 +1,86 @@
 #include "variable.h"
+#include "utils/str_utils.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
 extern void yyerror(const char *s);
 static void freeVariable(VariableElement *variableEl);
-static VariableData *evalVariable(VariableElement *variableElement, EvalContext *context);
+static VariableData *evalVariable(VariableElement *variableElement,
+                                  EvalContext *context);
 
-VariableElement *newIdentifierVariable(char *identifier, location_t location)
-{
-    VariableElement *variable = (VariableElement *)malloc(sizeof(VariableElement));
-    if (!variable)
-        return NULL;
+VariableElement *newIdentifierVariable(char *identifier, location_t location) {
+  printf("Creating new identifier variable: %s\n", identifier);
 
-    variable->free = freeVariable;
-    variable->eval = evalVariable;
-    variable->element_type = var_identifier;
-    variable->element_data.identifier = strdup(identifier);
-    variable->location = location;
+  VariableElement *variable =
+      (VariableElement *)malloc(sizeof(VariableElement));
+  if (!variable)
+    return NULL;
 
-    if (!variable->element_data.identifier)
-    {
-        free(variable);
-        return NULL;
-    }
+  variable->free = freeVariable;
+  variable->eval = evalVariable;
+  variable->element_type = var_identifier;
+  variable->element_data.identifier = strdup(identifier);
+  variable->location = location;
 
-    return variable;
+  if (!variable->element_data.identifier) {
+    free(variable);
+    return NULL;
+  }
+
+  return variable;
 }
 
-static void freeVariable(VariableElement *variableEl)
-{
-    if (!variableEl)
-        return;
+static void freeVariable(VariableElement *variableEl) {
+  if (!variableEl)
+    return;
 
-    switch (variableEl->element_type)
-    {
-    case var_identifier:
-        free(variableEl->element_data.identifier);
-        break;
-    }
+  switch (variableEl->element_type) {
+  case var_identifier:
+    free(variableEl->element_data.identifier);
+    break;
+  }
 
-    free(variableEl);
+  free(variableEl);
 }
 
-static void freeVariableData(VariableData *variableData)
-{
-    if (!variableData)
-        return;
+static void freeVariableData(VariableData *variableData) {
+  if (!variableData)
+    return;
 
-    free_type(variableData->variable_type);
-    free(variableData);
+  free(variableData->generated_code);
+  free_type(variableData->variable_type);
+  free(variableData);
 }
 
-static VariableData *evalVariable(VariableElement *variableElement, EvalContext *context)
-{
-    if (!variableElement)
-        return NULL;
+static VariableData *evalVariable(VariableElement *variableElement,
+                                  EvalContext *context) {
+  if (!variableElement)
+    return NULL;
 
-    VariableData *result = malloc(sizeof(VariableData));
-    if (!result)
-        return NULL;
-    result->free = freeVariableData;
+  printf("Evaluating variable: %s\n", variableElement->element_data.identifier);
 
-    switch (variableElement->element_type)
-    {
-    case var_identifier:
-    {
-        SymbolData *symbol = findSymbol(context, variableElement->element_data.identifier);
-        if (!symbol)
-        {
-            print_error(variableElement->location, "Variable '%s' is not declared in this context", variableElement->element_data.identifier);
-            free(result);
-            return NULL;
-        }
-        result->variable_type = copy_type(symbol->type);
-        break;
+  VariableData *result = malloc(sizeof(VariableData));
+  if (!result)
+    return NULL;
+  result->free = freeVariableData;
+
+  switch (variableElement->element_type) {
+  case var_identifier: {
+    SymbolData *symbol =
+        findSymbol(context, variableElement->element_data.identifier);
+    if (!symbol) {
+      print_error(variableElement->location,
+                  "Variable '%s' is not declared in this context",
+                  variableElement->element_data.identifier);
+      free(result);
+      return NULL;
     }
-    }
+    result->variable_type = copy_type(symbol->type);
+    result->generated_code = strdup(variableElement->element_data.identifier);
+    break;
+  }
+  }
 
-    return result;
+  return result;
 }

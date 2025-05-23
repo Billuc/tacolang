@@ -1,20 +1,24 @@
 #if !defined(PROGRAM_H__)
 #define PROGRAM_H__
 
-#include "ir/ast/statement.h"
+#include "ir/ast/definition.h"
 #include "ir/eval/context.h"
 #include "utils/error_utils.h"
 
-typedef struct programElement
-{
-    StatementList *statements;
-    location_t location;
+typedef struct programData {
+  char *generated_code;
+  void (*free)(struct programData *);
+} ProgramData;
 
-    void (*free)(struct programElement *);
-    void (*eval)(struct programElement *, EvalContext *);
+typedef struct programElement {
+  DefinitionList *definitions;
+  location_t location;
+
+  void (*free)(struct programElement *);
+  ProgramData *(*eval)(struct programElement *, EvalContext *);
 } ProgramElement;
 
-ProgramElement *newProgram(StatementList *statements, location_t location);
+ProgramElement *newProgram(DefinitionList *statements, location_t location);
 void eval(ProgramElement *program);
 
 #endif // PROGRAM_H__

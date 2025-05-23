@@ -33,6 +33,7 @@ typedef union
 typedef struct valueData
 {
     Type *value_type;
+    char *generated_code;
 
     void (*free)(struct valueData *);
 } ValueData;

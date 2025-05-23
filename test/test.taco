@@ -2,7 +2,7 @@ fn add(i1: mut.U32, i2: U32) -> U32 {
     i1 = 4
 }
 
-fn main(argc: U32, argv: ref.ref.U8) -> I32 {
+fn main(argc: CInt, argv: ref.ref.CChar) -> CInt {
     add(1, 4)
     add(1_000, 4)
     add(1., 4)

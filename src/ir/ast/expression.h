@@ -8,6 +8,7 @@
 typedef struct expressionData
 {
     Type *type;
+    char *generated_code;
 
     void (*free)(struct expressionData *);
 } ExpressionData;

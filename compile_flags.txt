@@ -1,0 +1,5 @@
+-g
+-Isrc
+-Wall
+-Wno-incompatible-pointer-types
+-lcheck

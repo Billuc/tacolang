@@ -4,13 +4,18 @@
 #include "ir/ast/statement.h"
 #include "ir/eval/context.h"
 
-typedef struct blockElement
-{
-    StatementList *statements;
-    location_t location;
+typedef struct blockData {
+  char *generated_code; // Generated code for the block
 
-    void (*free)(struct blockElement *);
-    void (*eval)(struct blockElement *, EvalContext *);
+  void (*free)(struct blockData *);
+} BlockData;
+
+typedef struct blockElement {
+  StatementList *statements;
+  location_t location;
+
+  void (*free)(struct blockElement *);
+  BlockData *(*eval)(struct blockElement *, EvalContext *);
 } BlockElement;
 
 BlockElement *newBlock(StatementList *statements, location_t loc);

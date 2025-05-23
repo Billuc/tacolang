@@ -20,6 +20,7 @@ typedef union
 typedef struct variableData
 {
     Type *variable_type;
+    char *generated_code;
 
     void (*free)(struct variableData *);
 } VariableData;

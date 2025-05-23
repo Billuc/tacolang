@@ -8,6 +8,7 @@
 typedef struct typedefData
 {
     Type *type;
+    char *generated_code;
 
     void (*free)(struct typedefData *);
 } TypedefData;
