@@ -56,8 +56,8 @@ extern int yywrap() { return 1; }
     char character;
 }
 
-%token LET ENDSTMT FN FN_RETURN
-%token <string> IDENTIFIER TYPEDEF MODIFIER STRING MULTILINE_STRING
+%token LET ENDSTMT FN FN_RETURN ARR 
+%token <string> IDENTIFIER TYPEDEF MODIFIER STRING MULTILINE_STRING COMMENT
 %token <integer> INTEGER
 %token <floating> FLOAT
 %token <boolean> BOOLEAN
@@ -103,6 +103,7 @@ statement: /* empty */ { $$ = NULL; }
     | assignment    { $$ = newAssignmentStatement($1, @$); }
     | declaration    { $$ = newDeclareStatement($1, @$); }
     | value      { $$ = newValueStatement($1, @$); }
+    | COMMENT { $$ = newCommentStatement($1, @$); }
 
 funcdef: FN IDENTIFIER '(' func_params ')' FN_RETURN typedef block { $$ = newFunctionDefinition($2, $4, $7, $8, @$); }
     | FN IDENTIFIER '(' ')' FN_RETURN typedef block { $$ = newFunctionDefinition($2, NULL, $6, $7, @$); }
@@ -129,6 +130,7 @@ value: INTEGER { $$ = newIntegerValue($1, @$); }
     | multiline_string { $$ = newStringValue($1, @$); }
     | expression { $$ = newExpressionValue($1, @$); }
     | funccall { $$ = newFunctionCallValue($1, @$); }
+    | variable { $$ = newVariableValue($1, @$); }
 
 multiline_string: MULTILINE_STRING { $$ = strdup($1); }
     | multiline_string MULTILINE_STRING { $$ = strconcat($1, $2); }
@@ -148,7 +150,8 @@ modifiers: /* empty */ { $$ = newModifierList(); }
     | modifiers modifier '.' { push($1, $2); $$ = $1; }
 
 modifier: MODIFIER { $$ = newModifier($1, @$); }
-
+    | ARR '[' ']' { $$ = newArrayModifier(-1, @$); }
+    | ARR '[' INTEGER ']' { $$ = newArrayModifier($3, @$); }
 %%
 
 int main(int argc, char* argv[]) {

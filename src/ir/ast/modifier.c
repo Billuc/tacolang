@@ -18,6 +18,7 @@ ModifierElement *newModifier(char *type, location_t location) {
   element->free = freeModifier;
   element->eval = evalModifier;
   element->location = location;
+  element->array_size = 0; // Default to 0 for non-array modifiers
 
   if (!strcmp(type, M_MUTABLE))
     element->type = m_mutable;
@@ -30,6 +31,19 @@ ModifierElement *newModifier(char *type, location_t location) {
     free(element);
     return NULL;
   }
+
+  return element;
+}
+
+ModifierElement *newArrayModifier(int size, location_t location) {
+  printf("Creating new array modifier: arr[%d]\n", size);
+
+  ModifierElement *element = malloc(sizeof(ModifierElement));
+  element->free = freeModifier;
+  element->eval = evalModifier;
+  element->location = location;
+  element->array_size = size;
+  element->type = m_array;
 
   return element;
 }
@@ -75,6 +89,17 @@ static ModifierData *evalModifier(ModifierElement *element,
   case m_optional:
     data->typeModifier->modifier_type = tm_optional;
     data->generated_code = strdup("");
+    break;
+  case m_array:
+    data->typeModifier->modifier_type = tm_array;
+    data->typeModifier->modifier_data.array_size = element->array_size;
+    data->generated_code = malloc(20);
+
+    if (element->array_size >= 0)
+      snprintf(data->generated_code, 20, "[%d]", element->array_size);
+    else
+      snprintf(data->generated_code, 20, "[]");
+
     break;
   }
 

@@ -10,6 +10,7 @@ typedef enum {
   m_mutable,
   m_reference,
   m_optional,
+  m_array,
 } Modifier;
 
 typedef struct modifierData {
@@ -22,6 +23,7 @@ typedef struct modifierData {
 typedef struct modifierElement {
   Modifier type;
   location_t location;
+  int array_size; // Only used for array modifiers
 
   void (*free)(struct modifierElement *);
   ModifierData *(*eval)(struct modifierElement *, EvalContext *);
@@ -30,6 +32,7 @@ typedef struct modifierElement {
 typedef LinkedList ModifierList;
 
 ModifierElement *newModifier(char *type, location_t location);
+ModifierElement *newArrayModifier(int size, location_t location);
 ModifierList *newModifierList();
 
 #endif // MODIFIER_H__

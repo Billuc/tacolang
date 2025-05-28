@@ -113,11 +113,25 @@ ValueElement *newFunctionCallValue(FunctionCallElement *value,
   return element;
 }
 
+ValueElement *newVariableValue(VariableElement *value, location_t location) {
+  printf("Creating new variable value\n");
+
+  ValueElement *element = malloc(sizeof(ValueElement));
+  element->type = v_variable;
+  element->value.variable = value;
+  element->location = location;
+  element->free = freeValue;
+  element->eval = evalValue;
+  return element;
+}
+
 void freeValue(ValueElement *valueEl) {
   if (valueEl->type == v_expression)
     valueEl->value.expression->free(valueEl->value.expression);
   else if (valueEl->type == v_funccall)
     valueEl->value.function_call->free(valueEl->value.function_call);
+  else if (valueEl->type == v_variable)
+    valueEl->value.variable->free(valueEl->value.variable);
   else if (valueEl->type == v_string)
     free(valueEl->value.string);
 
@@ -230,6 +244,20 @@ static ValueData *evalValue(ValueElement *valueElement, EvalContext *context) {
     // TODO
     // valueData->generated_code = strdup(functionCallData->generated_code);
     functionCallData->free(functionCallData);
+    break;
+  }
+  case v_variable: {
+    VariableElement *variable = valueElement->value.variable;
+    VariableData *variableData = variable->eval(variable, context);
+
+    if (variableData == NULL) {
+      free(valueData);
+      return NULL;
+    }
+
+    valueType = copy_type(variableData->variable_type);
+    valueData->generated_code = strdup(variableData->generated_code);
+    variableData->free(variableData);
     break;
   }
   }

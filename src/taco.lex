@@ -29,6 +29,7 @@ fn          { return FN; }
 mut         { yylval.string = strdup(yytext); return MODIFIER; }
 ref         { yylval.string = strdup(yytext); return MODIFIER; }
 opt         { yylval.string = strdup(yytext); return MODIFIER; }
+arr         { return ARR; }
 0x{HEX_DIGIT}+  { yylval.integer = strtol(strremove(yytext, 'x'), NULL, 16); return INTEGER; }
 0o{OCT_DIGIT}+  { yylval.integer = strtol(strremove(yytext, 'o'), NULL, 8); return INTEGER; }
 0b{BIN_DIGIT}+  { yylval.integer = strtol(strremove(yytext, 'b'), NULL, 2); return INTEGER; }
@@ -36,6 +37,7 @@ opt         { yylval.string = strdup(yytext); return MODIFIER; }
 ({DIGIT}){1,3}((_)?{DIGIT}{3})*\.{DIGIT}*  { yylval.floating = atof(strremove(yytext, '_')); return FLOAT; }
 true        { yylval.boolean = 1; return BOOLEAN; }
 false       { yylval.boolean = 0; return BOOLEAN; }
+\/\/[^\n]*  { yylval.string = strdup(&yytext[2]); return COMMENT; }
 '.{1}'          { yylval.character = yytext[1]; return CHARACTER; }
 '\\n'            { yylval.character = '\n'; return CHARACTER; }
 '\\r'            { yylval.character = '\r'; return CHARACTER; }

@@ -12,12 +12,14 @@ typedef enum {
   s_assignment,
   s_declaration,
   s_value,
+  s_comment,
 } StatementType;
 
 typedef union {
   AssignElement *assign;
   DeclareElement *declare;
   ValueElement *value;
+  char *comment; // For comment statements
 } Statement;
 
 typedef struct statementData {
@@ -42,6 +44,7 @@ StatementElement *newAssignmentStatement(AssignElement *assign,
 StatementElement *newDeclareStatement(DeclareElement *declare,
                                       location_t location);
 StatementElement *newValueStatement(ValueElement *value, location_t location);
+StatementElement *newCommentStatement(char *comment, location_t location);
 StatementList *newStatementList();
 
 #endif // STATEMENT_H__

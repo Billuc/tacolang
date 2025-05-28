@@ -48,6 +48,19 @@ StatementElement *newValueStatement(ValueElement *value, location_t location) {
   return element;
 }
 
+StatementElement *newCommentStatement(char *comment, location_t location) {
+  printf("Creating new comment statement\n");
+
+  StatementElement *element = malloc(sizeof(StatementElement));
+  Statement data = {.comment = strdup(comment)};
+  element->statement = data;
+  element->type = s_comment;
+  element->location = location;
+  element->free = freeStatement;
+  element->eval = evalStatement; // Comments don't evaluate to code
+  return element;
+}
+
 static void freeStatement(StatementElement *element) {
   switch (element->type) {
   case s_assignment:
@@ -58,6 +71,9 @@ static void freeStatement(StatementElement *element) {
     break;
   case s_value:
     element->statement.value->free(element->statement.value);
+    break;
+  case s_comment:
+    free(element->statement.comment);
     break;
   }
 
@@ -100,6 +116,11 @@ static StatementData *evalStatement(StatementElement *element,
     }
     strappend(&data->generated_code, value_data->generated_code);
     value_data->free(value_data);
+    break;
+  }
+  case s_comment: {
+    strappend(&data->generated_code, "// ");
+    strappend(&data->generated_code, element->statement.comment);
     break;
   }
   }

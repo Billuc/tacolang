@@ -2,4 +2,5 @@
 -Isrc
 -Wall
 -Wno-incompatible-pointer-types
+-I/home/linuxbrew/.linuxbrew/Cellar/check/0.15.2/include
 -lcheck

@@ -2,21 +2,18 @@ fn add(i1: mut.U32, i2: U32) -> U32 {
     i1 = 4
 }
 
-fn main(argc: CInt, argv: ref.ref.CChar) -> CInt {
-    add(1, 4)
-    add(1_000, 4)
-    add(1., 4)
-    add(0x1, 4)
-    add(0b1, 4)
-    add(0o1, 4)
-    add(false, 4)
-    add(true, 4)
-    add('1', 4)
-    add('\n', 4)
-    add('\x65', 4)
-    add("Hello", "world")
-    add(\\my
-    \\name
-    \\is
-    , 4)
+fn main(argc: CInt, argv: arr[].arr[].CChar) -> CInt {
+    let x: mut.U32 = 0
+    add(x, 4)
+    // add(1_000, 4)
+    // add(1., 4)
+    // add(0x1, 4)
+    // add(0b1, 4)
+    // add(0o1, 4)
+    // add(false, 4)
+    // add(true, 4)
+    // add('1', 4)
+    // add('\n', 4)
+    // add('\x65', 4)
+    // add("Hello", "world")
 }
