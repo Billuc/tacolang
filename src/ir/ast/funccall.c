@@ -84,7 +84,8 @@ static FunctionCall *evalFunctionCallElement(FunctionCallElement *functionCall,
   strappend(&call->generated_code, "(");
 
   LinkedListElement *currentArg = functionCall->arguments->head;
-  for (int i = 0; i < functionType->number_of_args; i++) {
+  for (int i = 0; i < functionType->number_of_args;
+       currentArg = currentArg->next, i++) {
     ValueElement *argument = (ValueElement *)currentArg->data;
     ValueData *argValue = argument->eval(argument, context);
 

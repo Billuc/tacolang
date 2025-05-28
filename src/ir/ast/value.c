@@ -227,7 +227,7 @@ static ValueData *evalValue(ValueElement *valueElement, EvalContext *context) {
     ExpressionData *expressionData = expression->eval(expression, context);
     valueType = copy_type(expressionData->type);
     // TODO
-    // valueData->generated_code = strdup(expressionData->generated_code);
+    valueData->generated_code = strdup(expressionData->generated_code);
     expressionData->free(expressionData);
     break;
   }
@@ -242,7 +242,7 @@ static ValueData *evalValue(ValueElement *valueElement, EvalContext *context) {
 
     valueType = copy_type(functionCallData->returnType);
     // TODO
-    // valueData->generated_code = strdup(functionCallData->generated_code);
+    valueData->generated_code = strdup(functionCallData->generated_code);
     functionCallData->free(functionCallData);
     break;
   }

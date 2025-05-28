@@ -98,7 +98,7 @@ static ModifierData *evalModifier(ModifierElement *element,
     if (element->array_size >= 0)
       snprintf(data->generated_code, 20, "[%d]", element->array_size);
     else
-      snprintf(data->generated_code, 20, "[]");
+      snprintf(data->generated_code, 20, "*");
 
     break;
   }
