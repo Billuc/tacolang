@@ -30,6 +30,7 @@ mut         { yylval.string = strdup(yytext); return MODIFIER; }
 ref         { yylval.string = strdup(yytext); return MODIFIER; }
 opt         { yylval.string = strdup(yytext); return MODIFIER; }
 arr         { return ARR; }
+struct      { return STRUCT; }
 0x{HEX_DIGIT}+  { yylval.integer = strtol(strremove(yytext, 'x'), NULL, 16); return INTEGER; }
 0o{OCT_DIGIT}+  { yylval.integer = strtol(strremove(yytext, 'o'), NULL, 8); return INTEGER; }
 0b{BIN_DIGIT}+  { yylval.integer = strtol(strremove(yytext, 'b'), NULL, 2); return INTEGER; }

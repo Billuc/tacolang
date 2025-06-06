@@ -1,8 +1,11 @@
+struct Test { a: U32, b: U32 }
+
 fn add(i1: mut.U32, i2: U32) -> U32 {
     i1 = 4
 }
 
 fn main(argc: CInt, argv: arr[].arr[].CChar) -> CInt {
+    let foo: Test = Test { a = 1, b = 2 }
     let x: mut.U32 = 0
     add(x, 4)
     // add(1_000, 4)

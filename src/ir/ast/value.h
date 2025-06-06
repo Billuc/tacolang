@@ -3,6 +3,7 @@
 
 #include "ir/ast/expression.h"
 #include "ir/ast/funccall.h"
+#include "ir/ast/struct_constructor.h"
 #include "ir/ast/variable.h"
 #include "ir/eval/context.h"
 #include "ir/eval/type.h"
@@ -17,7 +18,8 @@ typedef enum {
   v_string,
   v_expression,
   v_funccall,
-  v_variable
+  v_variable,
+  v_struct_constructor,
 } ValueType;
 
 typedef union {
@@ -29,6 +31,7 @@ typedef union {
   ExpressionElement *expression;
   FunctionCallElement *function_call;
   VariableElement *variable;
+  StructConstructorElement *struct_constructor;
 } Value;
 
 typedef struct valueData {
@@ -56,6 +59,8 @@ ValueElement *newStringValue(char *value, location_t location);
 ValueElement *newFunctionCallValue(FunctionCallElement *value,
                                    location_t location);
 ValueElement *newVariableValue(VariableElement *value, location_t location);
+ValueElement *newStructConstructorValue(StructConstructorElement *value,
+                                        location_t location);
 
 // freeValue isn't static because it is used for the argument list in funccall.c
 void freeValue(ValueElement *value);
