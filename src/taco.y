@@ -21,6 +21,8 @@ extern int yywrap() { return 1; }
 #include "ir/ast/modifier.h"
 #include "ir/ast/program.h"
 #include "ir/ast/statement.h"
+#include "ir/ast/struct.h"
+#include "ir/ast/struct_constructor.h"
 #include "ir/ast/typedef.h"
 #include "ir/ast/value.h"
 #include "ir/ast/variable.h"
@@ -46,6 +48,12 @@ extern int yywrap() { return 1; }
     ProgramElement *program;
     StatementElement *statement;
     StatementList *statementList;
+    StructElement *structdef;
+    StructFieldList *struct_fields;
+    StructFieldElement *struct_field;
+    StructConstructorElement *struct_constructor;
+    StructFieldValueList *struct_field_values;
+    StructFieldValueElement *struct_field_value;
     TypedefElement *typeDef;
     ValueElement *value;
     VariableElement *variable;
@@ -56,7 +64,7 @@ extern int yywrap() { return 1; }
     char character;
 }
 
-%token LET ENDSTMT FN FN_RETURN ARR 
+%token LET ENDSTMT FN FN_RETURN ARR STRUCT
 %token <string> IDENTIFIER TYPEDEF MODIFIER STRING MULTILINE_STRING COMMENT
 %token <integer> INTEGER
 %token <floating> FLOAT
@@ -80,6 +88,12 @@ extern int yywrap() { return 1; }
 %type <program> program
 %type <statement> statement
 %type <statementList> statements
+%type <structdef> structdef
+%type <struct_fields> struct_fields
+%type <struct_field> struct_field
+%type <struct_constructor> struct_constructor
+%type <struct_field_values> struct_field_values
+%type <struct_field_value> struct_field_value
 %type <typeDef> typedef
 %type <value> value
 %type <variable> variable
@@ -94,6 +108,7 @@ definitions: /* empty */ { $$ = newDefinitionList(); }
 
 definition: /* empty */ { $$ = NULL; }
     | funcdef { $$ = newFuncdefDefinition($1, @$); }
+    | structdef { $$ = newStructdefDefinition($1, @$); }
     /* | declaration { $$ = newDeclare($1); } */ // Consts ?
 
 statements: /* empty */ { $$ = newStatementList(); }
@@ -104,6 +119,22 @@ statement: /* empty */ { $$ = NULL; }
     | declaration    { $$ = newDeclareStatement($1, @$); }
     | value      { $$ = newValueStatement($1, @$); }
     | COMMENT { $$ = newCommentStatement($1, @$); }
+
+structdef: STRUCT TYPEDEF '{' struct_fields '}' { $$ = newStructDefinition($2, $4, @$); }
+
+struct_fields: /* empty */ { $$ = newStructFieldList(); }
+    | struct_field { $$ = newStructFieldList(); push($$, $1); }
+    | struct_fields ',' struct_field { push($1, $3); $$ = $1; }
+
+struct_field: IDENTIFIER ':' typedef { $$ = newStructField($1, $3, @$); }
+
+struct_constructor: TYPEDEF '{' struct_field_values '}' { $$ = newStructConstructor($1, $3, @$); }
+    | TYPEDEF '{' '}' { $$ = newStructConstructor($1, NULL, @$); }
+    
+struct_field_values: struct_field_value { $$ = newStructFieldValueList(); push($$, $1); }
+    | struct_field_values ',' struct_field_value { push($1, $3); $$ = $1; }
+
+struct_field_value: IDENTIFIER '=' value { $$ = newStructFieldValue($1, $3, @$); }
 
 funcdef: FN IDENTIFIER '(' func_params ')' FN_RETURN typedef block { $$ = newFunctionDefinition($2, $4, $7, $8, @$); }
     | FN IDENTIFIER '(' ')' FN_RETURN typedef block { $$ = newFunctionDefinition($2, NULL, $6, $7, @$); }
@@ -131,6 +162,7 @@ value: INTEGER { $$ = newIntegerValue($1, @$); }
     | expression { $$ = newExpressionValue($1, @$); }
     | funccall { $$ = newFunctionCallValue($1, @$); }
     | variable { $$ = newVariableValue($1, @$); }
+    | struct_constructor { $$ = newStructConstructorValue($1, @$); }
 
 multiline_string: MULTILINE_STRING { $$ = strdup($1); }
     | multiline_string MULTILINE_STRING { $$ = strconcat($1, $2); }

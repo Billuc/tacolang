@@ -125,6 +125,19 @@ ValueElement *newVariableValue(VariableElement *value, location_t location) {
   return element;
 }
 
+ValueElement *newStructConstructorValue(StructConstructorElement *value,
+                                        location_t location) {
+  printf("Creating new struct constructor value\n");
+
+  ValueElement *element = malloc(sizeof(ValueElement));
+  element->type = v_struct_constructor;
+  element->value.struct_constructor = value;
+  element->location = location;
+  element->free = freeValue;
+  element->eval = evalValue;
+  return element;
+}
+
 void freeValue(ValueElement *valueEl) {
   if (valueEl->type == v_expression)
     valueEl->value.expression->free(valueEl->value.expression);
@@ -134,6 +147,8 @@ void freeValue(ValueElement *valueEl) {
     valueEl->value.variable->free(valueEl->value.variable);
   else if (valueEl->type == v_string)
     free(valueEl->value.string);
+  else if (valueEl->type == v_struct_constructor)
+    valueEl->value.struct_constructor->free(valueEl->value.struct_constructor);
 
   free(valueEl);
 }
@@ -258,6 +273,22 @@ static ValueData *evalValue(ValueElement *valueElement, EvalContext *context) {
     valueType = copy_type(variableData->variable_type);
     valueData->generated_code = strdup(variableData->generated_code);
     variableData->free(variableData);
+    break;
+  }
+  case v_struct_constructor: {
+    StructConstructorElement *structConstructor =
+        valueElement->value.struct_constructor;
+    StructConstructorData *structData =
+        structConstructor->eval(structConstructor, context);
+
+    if (structData == NULL) {
+      free(valueData);
+      return NULL;
+    }
+
+    valueType = copy_type(structData->type);
+    valueData->generated_code = strdup(structData->generated_code);
+    structData->free(structData);
     break;
   }
   }
